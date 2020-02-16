@@ -6,6 +6,8 @@
 
 > A Prometheus datasource for ChartJS.
 
+![screenshot](./screenshot.png)
+
 #### Dependencies:
 
 - requires [chart.js](https://www.chartjs.org) 2.7 or later.
@@ -14,7 +16,7 @@
 
 ## ✨ Features (WIP)
 
-- Loads time-series from Prometheus to Chart.js.
+- Loads time-series from Prometheus into Chart.js.
 - **Similar to Grafana**, but ported to Chart.js for public-facing web applications.
 - **UMD compatible**, you can use it with any module loader
 - Supports **line chart only** (for now!)
