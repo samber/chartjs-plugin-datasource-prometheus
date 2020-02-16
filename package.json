@@ -1,0 +1,57 @@
+{
+  "name": "chartjs-plugin-datasource-prometheus",
+  "description": "Chart.js plugin for Prometheus datasource. Like Grafana, but standalone.",
+  "author": "Samuel Berthe",
+  "version": "0.1.0",
+  "license": "MIT",
+  "main": "dist/chartjs-plugin-datasource-prometheus.cjs.js",
+  "module": "dist/chartjs-plugin-datasource-prometheus.esm.js",
+  "browser": "dist/chartjs-plugin-datasource-prometheus.umd.js",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "test": "node test/test.js",
+    "pretest": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/samber/chartjs-plugin-datasource-prometheus.git"
+  },
+  "bugs": {
+    "url": "https://github.com/samber/chartjs-plugin-datasource-prometheus/issues"
+  },
+  "files": [
+    "dist/"
+  ],
+  "dependencies": {
+    "prometheus-query": ">=2.0"
+  },
+  "peerDependencies": {
+    "chart.js": ">= 2.7.0 < 3"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^11.0.1",
+    "@rollup/plugin-node-resolve": "^7.0.0",
+    "chart.js": "~2.9.0",
+    "rollup": "^1.31.1"
+  },
+  "keywords": [
+    "chartjs",
+    "chart.js",
+    "graph",
+    "grafana",
+    "datasource",
+    "plugin",
+    "prometheus",
+    "client",
+    "query",
+    "api",
+    "javascript",
+    "admin",
+    "series",
+    "range",
+    "label",
+    "timeseries",
+    "tsdb"
+  ]
+}
