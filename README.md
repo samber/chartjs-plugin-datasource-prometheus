@@ -81,16 +81,17 @@ var myChart = new Chart(ctx, {
     plugins: {
       'datasource-prometheus': {
         prometheus: {
-          endpoint: "http://demo.robustperception.io:9090/",
+          endpoint: "http://demo.robustperception.io:9090",
+          baseURL: "/api/v1",   // default value
         },
         query: 'sum by (job) (go_gc_duration_seconds)',
         timeRange: {
           type: 'relative',
-                    
+
           // from 12 hours ago to now
           start: -12 * 60 * 60 * 1000,
           end: end,
-                    
+
           // refresh every 5s
           msUpdateInterval: 5 * 1000,
         },
@@ -112,7 +113,7 @@ Please read the [security advisory](https://github.com/samber/prometheus-query-j
 
 ## 🤝 Contributing
 
-The Prometheus Datasource is open source and contributions from community (you!) are welcomed.
+The Prometheus Datasource is open source and contributions from community (you!) are welcome.
 
 There are many ways to contribute: writing code, documentation, reporting issues...
 
