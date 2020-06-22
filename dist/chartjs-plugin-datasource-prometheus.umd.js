@@ -2222,7 +2222,7 @@
 	            start,
 	            end
 	        } = datasource.getStartAndEndDates(_options['timeRange']);
-	        const step = datasource.getPrometheusStepAuto(start, end, chart.width);
+	        const step = _options['timeRange']['step'] || datasource.getPrometheusStepAuto(start, end, chart.width);
 
 	        const pq = new prometheusQuery_umd(prometheus);
 
