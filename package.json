@@ -15,10 +15,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/samber/chartjs-plugin-datasource-prometheus.git"
+    "url": "https://github.com/sFrenkie/chartjs-plugin-datasource-prometheus.git"
   },
   "bugs": {
-    "url": "https://github.com/samber/chartjs-plugin-datasource-prometheus/issues"
+    "url": "https://github.com/sFrenkie/chartjs-plugin-datasource-prometheus/issues"
   },
   "files": [
     "dist/"
