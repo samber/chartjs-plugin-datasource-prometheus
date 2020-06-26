@@ -60,6 +60,10 @@ export default {
 
                 }
 
+                if (_options.fillGaps) {
+                    fillGaps(chart, start, end, step);
+                }
+
                 setTimeAxesOptions(chart, start, end);
 
                 chart['datasource-prometheus']['loading'] = true;

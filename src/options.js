@@ -83,6 +83,7 @@ export default {
                 'rgba(255, 159, 64, 1)'
             ],
             'borderWidth': 3,
+            'fillGaps': false,
         };
 
         return Object.assign(dEfault, options);
