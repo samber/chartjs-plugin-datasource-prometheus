@@ -162,6 +162,22 @@ const setTimeAxesOptions = (chart, start, end) => {
     chart.config.options.scales.xAxes[0].time.displayFormats.hour = 'MMM D, hA'; // override default momentjs format for 'hour' time unit
 };
 
+const spanGaps = (chart, start, end, step) => {
+    chart.data.datasets.forEach((dataSet, index) => {
+        if (Math.abs(start - dataSet.data[0].t) > (1100 * step)) {
+            for (var i = Math.abs(start - dataSet.data[0].t) / (step * 1000); i > 1; i--) {
+                chart.data.datasets[index].data.unshift({ t: new Date(dataSet.data[0].t.getTime() - step * 1000), v: Number.NaN });
+            }
+        }
+
+        if (Math.abs(end - dataSet.data[dataSet.data.length - 1].t) > (1100 * step)) {
+            for (var i = Math.abs(end - dataSet.data[dataSet.data.length - 1].t) / (step * 1000); i > 1; i--) {
+                chart.data.datasets[index].data.push({ t: new Date(dataSet.data[chart.data.datasets[index].data.length - 1].t.getTime() + step * 1000), v: Number.NaN });
+            }
+        }
+    });
+}
+
 var ChartDatasourcePrometheusPlugin = {
     id: 'datasource-prometheus',
 
@@ -214,7 +230,10 @@ var ChartDatasourcePrometheusPlugin = {
                             borderWidth: _options.borderWidth,
                         };
                     });
+                }
 
+                if (chart.options.spanGaps) {
+                    spanGaps(chart, start, end, step);
                 }
 
                 setTimeAxesOptions(chart);
