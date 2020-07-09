@@ -45,7 +45,7 @@ export default {
                 if (res.result.length > 0) {
                     chart.data.datasets = res.result.map((serie, i) => {
                         return {
-                            label: serie.metric.toString(),
+                            label: selectLabel(_options, serie, i),
                             data: serie.values.map((v, j) => {
                                 return {
                                     t: v.time,
@@ -53,7 +53,7 @@ export default {
                                 };
                             }),
                             backgroundColor: _options.backgroundColor[i % _options.backgroundColor.length],
-                            borderColor: _options.borderColor[i % _options.borderColor.length],
+                            borderColor: selectBorderColor(_options, serie, i),
                             borderWidth: _options.borderWidth,
                         };
                     });

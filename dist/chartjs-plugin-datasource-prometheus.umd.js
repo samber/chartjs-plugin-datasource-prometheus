@@ -2220,6 +2220,20 @@
 		});
 	}
 
+	const selectLabel = (_options, serie, i) => {
+		if (_options.findInLabelMap ) {
+			return _options.findInLabelMap(serie.metric) || serie.metric.toString();
+		}
+		return serie.metric.toString();
+	}
+
+	const selectBorderColor = (_options, serie, i) => {
+		if (_options.findInBorderColorMap) {
+			return _options.findInBorderColorMap(serie.metric) || _options.borderColor[i % _options.borderColor.length];
+		}
+		return _options.borderColor[i % _options.borderColor.length];
+	}
+
 	var ChartDatasourcePrometheusPlugin = {
 	    id: 'datasource-prometheus',
 
@@ -2260,16 +2274,16 @@
                 	if (res.result.length > 0) {
 	                    chart.data.datasets = res.result.map((serie, i) => {
 	                        return {
-	                            label: serie.metric.toString(),
-	                            data: serie.values.map((v, j) => {
-	                                return {
-	                                    t: v.time,
-	                                    y: v.value,
-	                                };
-	                            }),
-	                            backgroundColor: _options.backgroundColor[i % _options.backgroundColor.length],
-	                            borderColor: _options.borderColor[i % _options.borderColor.length],
-	                            borderWidth: _options.borderWidth,
+														label: selectLabel(_options, serie, i),
+														data: serie.values.map((v, j) => {
+																return {
+																		t: v.time,
+																		y: v.value,
+																};
+														}),
+														backgroundColor: _options.backgroundColor[i % _options.backgroundColor.length],
+														borderColor: selectBorderColor(_options, serie, i),
+														borderWidth: _options.borderWidth,
 	                        };
 											});
 											
