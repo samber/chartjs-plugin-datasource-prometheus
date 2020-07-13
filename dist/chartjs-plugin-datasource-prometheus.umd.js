@@ -2257,7 +2257,7 @@
 	        const _options = opt.defaultOptionsValues(options);
 
 	        if (!!chart['datasource-prometheus'] && chart['datasource-prometheus']['loading'] == true)
-	            return true;
+						return true;
 
 	        const prometheus = _options['prometheus'];
 	        const query = _options['query'];
@@ -2265,9 +2265,18 @@
 	            start,
 	            end
 	        } = datasource.getStartAndEndDates(_options['timeRange']);
-	        const step = _options['timeRange']['step'] || datasource.getPrometheusStepAuto(start, end, chart.width);
+					const step = _options['timeRange']['step'] || datasource.getPrometheusStepAuto(start, end, chart.width);
+					if (!!chart['datasource-prometheus'] && 
+								chart['datasource-prometheus']['step'] == step &&
+								chart['datasource-prometheus']['start'] == start &&
+								chart['datasource-prometheus']['end'] == end)
+							return true;							
 
-	        const pq = new prometheusQuery_umd(prometheus);
+					chart['datasource-prometheus']['step'] = step;
+					chart['datasource-prometheus']['start'] = start;
+					chart['datasource-prometheus']['end'] = end;
+
+					const pq = new prometheusQuery_umd(prometheus);
 
 	        pq.rangeQuery(query, start, end, step)
 	            .then((res) => {

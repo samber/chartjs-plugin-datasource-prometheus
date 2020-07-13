@@ -37,6 +37,15 @@ export default {
             end
         } = datasource.getStartAndEndDates(_options['timeRange'])
         const step = _options['timeRange']['step'] || datasource.getPrometheusStepAuto(start, end, chart.width);
+        if (!!chart['datasource-prometheus'] && 
+        chart['datasource-prometheus']['step'] == step &&
+        chart['datasource-prometheus']['start'] == start &&
+        chart['datasource-prometheus']['end'] == end)
+            return true;
+
+        chart['datasource-prometheus']['step'] = step;
+        chart['datasource-prometheus']['start'] = start;
+        chart['datasource-prometheus']['end'] = end;
 
         const pq = new PrometheusQuery(prometheus);
 
