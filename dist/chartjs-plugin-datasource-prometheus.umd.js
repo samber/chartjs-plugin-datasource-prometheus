@@ -1721,7 +1721,7 @@
 	          this.endpoint = options.endpoint.replace(/\/$/, "");
 	          this.baseURL = options.baseURL || "/api/v1/";
 	          this.headers = options.headers || {};
-	          this.auth = options.auth || {};
+	          this.auth = options.auth;
 	          this.proxy = options.proxy || {};
 	          this.withCredentials = options.withCredentials || false;
 	          this.timeout = options.timeout || 10000;
