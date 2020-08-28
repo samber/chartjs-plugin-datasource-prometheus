@@ -151,20 +151,9 @@ const setTimeAxesOptions = (chart, start, end) => {
     chart.config.options.scales.xAxes[0].time = !!chart.config.options.scales.xAxes[0].time ? chart.config.options.scales.xAxes[0].time : {};
     chart.config.options.scales.xAxes[0].time.displayFormats = !!chart.config.options.scales.xAxes[0].time.displayFormats ? chart.config.options.scales.xAxes[0].time.displayFormats : {};
 
-    // const w = chart.width;
-    // const msInterval = (end.getTime() - start.getTime());
-    // const msPerPixel = msInterval / w;
-
-    // for (let i = 0; i < AXES_UNIT_AND_STEP.length && AXES_UNIT_AND_STEP[i]['minMsPerPixel'] * AXES_UNIT_AND_STEP[i]['stepSize'] < msPerPixel; i++) {
-    //     chart.config.options.scales.xAxes[0].time.unit = AXES_UNIT_AND_STEP[i]['unit'];
-    //     chart.config.options.scales.xAxes[0].time.stepSize = AXES_UNIT_AND_STEP[i]['stepSize'];
-    // }
-
-    chart.config.options.scales.xAxes[0].type = 'time';
-    chart.config.options.scales.xAxes[0].distribution = 'linear';
-    // chart.config.options.scales.xAxes[0].time.stepSize = PIXEL_STEP_SIZE; // pixels between 2 vertical grid lines
-    chart.config.options.scales.xAxes[0].time.minUnit = 'millisecond';
-    chart.config.options.scales.xAxes[0].time.displayFormats.hour = 'MMM D, hA'; // override default momentjs format for 'hour' time unit
+    chart.config.options.scales.xAxes[0].type = chart.config.options.scales.xAxes[0].type || 'time';
+    chart.config.options.scales.xAxes[0].distribution = chart.config.options.scales.xAxes[0].distribution || 'linear';
+    chart.config.options.scales.xAxes[0].time.minUnit = chart.config.options.scales.xAxes[0].time.minUnit || 'second';
 };
 
 const fillGaps = (chart, start, end, step) => {
