@@ -152,29 +152,31 @@ const setTimeAxesOptions = (chart, start, end) => {
     chart.config.options.scales.xAxes[0].time.minUnit = chart.config.options.scales.xAxes[0].time.minUnit || 'second';
 };
 
-const fillGaps = (chart, start, end, step) => {
+const fillGaps = (chart, start, end, step, options = {}) => {
+    var minStep = (options.minStep || step);
+    minStep = minStep >= step ? minStep : step; 
     chart.data.datasets.forEach((dataSet, index) => {
         // detect missing data in response
         for (var i = dataSet.data.length - 2; i > 0 ; i--) {
-            if ((dataSet.data[i + 1].t - dataSet.data[i].t) > (1100 * step)) {
-                for (var steps = (dataSet.data[i + 1].t - dataSet.data[i].t) / (step * 1000); steps > 1; steps--) {
+            if ((dataSet.data[i + 1].t - dataSet.data[i].t) > (1100 * minStep)) {
+                for (var steps = (dataSet.data[i + 1].t - dataSet.data[i].t) / (minStep * 1000); steps > 1; steps--) {
                     dataSet.data.splice(i + 1, 0,
-                        { t: new Date(dataSet.data[i + 1].t.getTime() - step * 1000), v: Number.NaN });	
+                        { t: new Date(dataSet.data[i + 1].t.getTime() - minStep * 1000), v: Number.NaN });	
                 }
             }
         }
 
         // at the start of time range
-        if (Math.abs(start - dataSet.data[0].t) > (1100 * step)) {
-            for (var i = Math.abs(start - dataSet.data[0].t) / (step * 1000); i > 1; i--) {
-                chart.data.datasets[index].data.unshift({ t: new Date(dataSet.data[0].t.getTime() - step * 1000), v: Number.NaN });
+        if (Math.abs(start - dataSet.data[0].t) > (1100 * minStep)) {
+            for (var i = Math.abs(start - dataSet.data[0].t) / (minStep * 1000); i > 1; i--) {
+                chart.data.datasets[index].data.unshift({ t: new Date(dataSet.data[0].t.getTime() - minStep * 1000), v: Number.NaN });
             }
         }
 
         // at the end of time range
-        if (Math.abs(end - dataSet.data[dataSet.data.length - 1].t) > (1100 * step)) {
-            for (var i = Math.abs(end - dataSet.data[dataSet.data.length - 1].t) / (step * 1000); i > 1; i--) {
-                chart.data.datasets[index].data.push({ t: new Date(dataSet.data[chart.data.datasets[index].data.length - 1].t.getTime() + step * 1000), v: Number.NaN });
+        if (Math.abs(end - dataSet.data[dataSet.data.length - 1].t) > (1100 * minStep)) {
+            for (var i = Math.abs(end - dataSet.data[dataSet.data.length - 1].t) / (minStep * 1000); i > 1; i--) {
+                chart.data.datasets[index].data.push({ t: new Date(dataSet.data[chart.data.datasets[index].data.length - 1].t.getTime() + minStep * 1000), v: Number.NaN });
             }
         }
     });
@@ -268,7 +270,7 @@ var ChartDatasourcePrometheusPlugin = {
                 }
 
                 if (_options.fillGaps) {
-                    fillGaps(chart, start, end, step);
+                    fillGaps(chart, start, end, step, _options);
                 }
 
                 setTimeAxesOptions(chart);

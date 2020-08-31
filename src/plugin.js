@@ -81,7 +81,7 @@ export default {
                 }
 
                 if (_options.fillGaps) {
-                    fillGaps(chart, start, end, step);
+                    fillGaps(chart, start, end, step, _options);
                 }
 
                 setTimeAxesOptions(chart, start, end);
