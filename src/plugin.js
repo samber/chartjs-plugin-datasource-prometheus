@@ -52,6 +52,16 @@ export default {
         pq.rangeQuery(query, start, end, step)
             .then((res) => {
                 if (res.result.length > 0) {
+                    var isHiddenMap = {};
+                    if (chart.data.datasets.length > 0) {
+                        for(var oldDataSetKey in chart.data.datasets){
+                            var oldDataSet = chart.data.datasets[oldDataSetKey];
+                            var metaIndex = 0;
+                            for (var id in oldDataSet._meta ){ metaIndex = id; }
+                            isHiddenMap[oldDataSet.label] = !chart.isDatasetVisible(oldDataSet._meta[metaIndex].index);
+                        }
+                    }
+
                     chart.data.datasets = res.result.map((serie, i) => {
                         return {
                             label: selectLabel(_options, serie, i),
@@ -64,6 +74,7 @@ export default {
                             backgroundColor: _options.backgroundColor[i % _options.backgroundColor.length],
                             borderColor: selectBorderColor(_options, serie, i),
                             borderWidth: _options.borderWidth,
+                            hidden: isHiddenMap[selectLabel(_options, serie, i)] || false,
                         };
                     });
 
