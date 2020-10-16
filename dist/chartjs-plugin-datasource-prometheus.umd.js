@@ -2302,15 +2302,25 @@
 										if (_options.fillGaps) {
 											fillGaps(chart, start, end, step, _options);
 										}
+										setTimeAxesOptions(chart);
+
+										chart['datasource-prometheus']['loading'] = true;
+										chart.update();
+										chart['datasource-prometheus']['loading'] = false;
 	                } else {
 										chart.data.datasets = []; // no data
+										var ctx = chart.chart.ctx;
+                    var width = chart.chart.width;
+                    var height = chart.chart.height;
+                    chart.clear();
+
+                    ctx.save();
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.font = "21px 'Muli-Bold'";
+                    ctx.fillText('No data to display for selected time period', width / 2, height / 2);
+                    ctx.restore();
 									}
-
-	                setTimeAxesOptions(chart);
-
-	                chart['datasource-prometheus']['loading'] = true;
-	                chart.update();
-	                chart['datasource-prometheus']['loading'] = false;
 	            });
 
 	        return false;
