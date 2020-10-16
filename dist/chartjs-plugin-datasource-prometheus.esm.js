@@ -182,6 +182,7 @@ const fillGaps = (chart, start, end, step, options = {}) => {
     });
 }
 
+
 const selectLabel = (_options, serie, i) => {
     if (_options.findInLabelMap ) {
         return _options.findInLabelMap(serie.metric) || serie.metric.toString();
@@ -267,11 +268,14 @@ var ChartDatasourcePrometheusPlugin = {
                             hidden: isHiddenMap[selectLabel(_options, serie, i)] || false,
                         };
                     });
+
+                    if (_options.fillGaps) {
+                        fillGaps(chart, start, end, step, _options);
+                    }
+                } else {
+                    chart.data.datasets = []; // no data
                 }
 
-                if (_options.fillGaps) {
-                    fillGaps(chart, start, end, step, _options);
-                }
 
                 setTimeAxesOptions(chart);
 

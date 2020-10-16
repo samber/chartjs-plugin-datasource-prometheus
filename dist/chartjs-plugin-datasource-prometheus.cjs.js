@@ -271,11 +271,12 @@ var ChartDatasourcePrometheusPlugin = {
                             hidden: isHiddenMap[selectLabel(_options, serie, i)] || false,
                         };
                     });
-
-                }
-
-                if (_options.fillGaps) {
-                    fillGaps(chart, start, end, step, _options);
+                    
+                    if (_options.fillGaps) {
+                        fillGaps(chart, start, end, step, _options);
+                    }
+                } else {
+                    chart.data.datasets = []; // no data
                 }
 
                 setTimeAxesOptions(chart);

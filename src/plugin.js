@@ -78,10 +78,12 @@ export default {
                         };
                     });
 
-                }
+                    if (_options.fillGaps) {
+                        fillGaps(chart, start, end, step, _options);
+                    }
 
-                if (_options.fillGaps) {
-                    fillGaps(chart, start, end, step, _options);
+                } else {
+                    chart.data.datasets = []; // no data
                 }
 
                 setTimeAxesOptions(chart, start, end);

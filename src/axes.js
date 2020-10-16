@@ -78,9 +78,10 @@ const fillGaps = (chart, start, end, step, options = {}) => {
             for (var i = Math.abs(end - dataSet.data[dataSet.data.length - 1].t) / (minStep * 1000); i > 1; i--) {
                 chart.data.datasets[index].data.push({ t: new Date(dataSet.data[chart.data.datasets[index].data.length - 1].t.getTime() + minStep * 1000), v: Number.NaN });
             }
-        }
+            }
     });
 }
+
 
 const selectLabel = (_options, serie, i) => {
     if (_options.findInLabelMap ) {
