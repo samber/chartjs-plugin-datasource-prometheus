@@ -272,6 +272,11 @@ var ChartDatasourcePrometheusPlugin = {
                     if (_options.fillGaps) {
                         fillGaps(chart, start, end, step, _options);
                     }
+
+                    if (_options.dataSetHook){
+                        chart.data.datasets = _options.dataSetHook(chart.data.datasets)
+                    }
+
                     setTimeAxesOptions(chart);
 
                     chart['datasource-prometheus']['loading'] = true;
