@@ -82,8 +82,8 @@ export default {
                         fillGaps(chart, start, end, step, _options);
                     }
 
-                    if (_options.dataSetHook){
-                        chart.data.datasets = _options.dataSetHook(chart.data.datasets)
+                    if (_options.dataSetHook) {
+                        chart.data.datasets = _options.dataSetHook(chart.data.datasets);
                     }
 
                     setTimeAxesOptions(chart);
