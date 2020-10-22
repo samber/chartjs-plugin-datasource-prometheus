@@ -2317,8 +2317,13 @@
                     ctx.save();
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.font = "21px 'Muli-Bold'";
-                    ctx.fillText('No data to display for selected time period', width / 2, height / 2);
+                    if (_options.noData){
+											ctx.font = _options.noData.font;
+											ctx.fillText(_options.noData.message, width / 2, height / 2);
+									} else {
+											ctx.font = "16px normal 'Helvetica Nueue'";
+											ctx.fillText('No data to display', width / 2, height / 2);
+									}
                     ctx.restore();
 									}
 	            });
