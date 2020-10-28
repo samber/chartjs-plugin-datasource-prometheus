@@ -284,27 +284,33 @@ var ChartDatasourcePrometheusPlugin = {
                     chart['datasource-prometheus']['loading'] = false;
                 } else {
                     chart.data.datasets = []; // no data
-                    var ctx = chart.chart.ctx;
-                    var width = chart.chart.width;
-                    var height = chart.chart.height;
-                    chart.clear();
-
-                    ctx.save();
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    if (_options.noData){
-                        ctx.font = _options.noData.font;
-                        ctx.fillText(_options.noData.message, width / 2, height / 2);
-                    } else {
-                        ctx.font = "16px normal 'Helvetica Nueue'";
-                        ctx.fillText('No data to display', width / 2, height / 2);
-                    }
-                    ctx.restore();
                 }
             });
 
-        return false;
+        return true;
     },
+    beforeRender: (chart, options) => {
+        const _options = opt.defaultOptionsValues(options);
+        if (chart.data.datasets.length == 0) {
+            var ctx = chart.chart.ctx;
+            var width = chart.chart.width;
+            var height = chart.chart.height;
+            chart.clear();
+    
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            if (_options.noData){
+                ctx.font = _options.noData.font;
+                ctx.fillText(_options.noData.message, width / 2, height / 2);
+            } else {
+                ctx.font = "16px normal 'Helvetica Nueue'";
+                ctx.fillText('No data to display', width / 2, height / 2);
+            }
+            ctx.restore();
+        }
+        return false;
+    }
 
     destroy: (chart, options) => {
         // auto update
