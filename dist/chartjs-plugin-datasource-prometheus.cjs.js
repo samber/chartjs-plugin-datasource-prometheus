@@ -311,8 +311,9 @@ var ChartDatasourcePrometheusPlugin = {
                 ctx.fillText('No data to display', width / 2, height / 2);
             }
             ctx.restore();
+            return false;
         }
-        return false;
+        return true;
     },
 
     destroy: (chart, options) => {
