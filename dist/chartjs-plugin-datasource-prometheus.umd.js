@@ -2314,6 +2314,7 @@
 										chart['datasource-prometheus']['loading'] = false;
 	                } else {
 										chart.data.datasets = []; // no data
+									}
 	            });
 
 	        return true;
