@@ -124,14 +124,22 @@ There are many ways to contribute: writing code, documentation, reporting issues
 * Twitter: [@samuelberthe](https://twitter.com/samuelberthe)
 * Github: [@samber](https://github.com/samber)
 
+👤 **Frantisek Svoboda**
+
+* Twitter: [@sFrenkie](https://twitter.com/sFrenkie)
+* Github: [@sFrenkie](https://github.com/sFrenkie)
+
+
 ## 💫 Show your support
 
 Give a ⭐️ if this project helped you!
 
 [![support us](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/samber)
+[![support us](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/sfrenkie)
 
 ## 📝 License
 
 Copyright © 2020 [Samuel Berthe](https://github.com/samber).
+Copyright © 2020 [Frantisek Svoboda](https://github.com/sfrenkie).
 
 This project is [MIT](./LICENSE) licensed.
