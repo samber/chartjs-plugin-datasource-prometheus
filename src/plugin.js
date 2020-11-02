@@ -64,6 +64,8 @@ export default {
 
                     chart.data.datasets = res.result.map((serie, i) => {
                         return {
+                            tension: _options.tension || 0.4,
+                            steppedLine: _options.steppedLine || false,
                             label: selectLabel(_options, serie, i),
                             data: serie.values.map((v, j) => {
                                 return {
