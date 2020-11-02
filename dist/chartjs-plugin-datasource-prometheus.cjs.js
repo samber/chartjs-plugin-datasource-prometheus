@@ -260,6 +260,8 @@ var ChartDatasourcePrometheusPlugin = {
                         return {
                             tension: _options.tension || 0.4,
                             stepped: _options.stepped || false,
+                            cubicInterpolationMode: _options.cubicInterpolationMode || 'default',
+                            fill: _options.fill || false,
                             label: selectLabel(_options, serie, i),
                             data: serie.values.map((v, j) => {
                                 return {

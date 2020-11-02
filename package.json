@@ -2,7 +2,7 @@
   "name": "chartjs-plugin-datasource-prometheus",
   "description": "Chart.js plugin for Prometheus datasource. Like Grafana, but standalone.",
   "author": "Samuel Berthe, Frantisek Svoboda",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "license": "MIT",
   "main": "dist/chartjs-plugin-datasource-prometheus.cjs.js",
   "module": "dist/chartjs-plugin-datasource-prometheus.esm.js",
