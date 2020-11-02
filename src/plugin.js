@@ -36,7 +36,9 @@ export default {
             start,
             end
         } = datasource.getStartAndEndDates(_options['timeRange'])
-        const step = _options['timeRange']['step'] || datasource.getPrometheusStepAuto(start, end, chart.width);
+        const expectedStep = _options['timeRange']['step'] || datasource.getPrometheusStepAuto(start, end, chart.width);
+        const minStep = (_options.minStep || expectedStep);
+        const step = minStep >= expectedStep ? minStep : expectedStep;
         if (!!chart['datasource-prometheus'] && 
         chart['datasource-prometheus']['step'] == step &&
         chart['datasource-prometheus']['start'] == start &&
