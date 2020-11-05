@@ -77,7 +77,7 @@ export default {
                                     y: v.value,
                                 };
                             }),
-                            backgroundColor: _options.backgroundColor[i % _options.backgroundColor.length],
+                            backgroundColor: selectBackGroundColor(_options, serie, i),
                             borderColor: selectBorderColor(_options, serie, i),
                             borderWidth: _options.borderWidth,
                             hidden: isHiddenMap[selectLabel(_options, serie, i)] || false,
