@@ -14,7 +14,7 @@
 - requires [moment.js](https://momentjs.com/) 2.0 or later.
 - requires [prometheus-query](https://github.com/samber/prometheus-query-js) 2.0 or later.
 
-## ✨ Features (WIP)
+## ✨ Features
 
 - Loads time-series from Prometheus into Chart.js.
 - **Similar to Grafana**, but ported to Chart.js for public-facing web applications.
@@ -22,6 +22,10 @@
 - Supports **line chart only** (for now!)
 - Graph **auto-refresh**
 - Date interval can be **absolute** or **relative** to `now`
+- Hooks available (styling, labeling, data presentation...)
+- Empty chart message
+- Break or continuous lines when gap in data
+- Line styling
 
 ⚠️ This project is not intented to replace [Grafana](https://grafana.com/). For monitoring purpose or internal company graph showing, Grafana will definitely be better and more secure.
 
@@ -101,6 +105,40 @@ var myChart = new Chart(ctx, {
 });
 ```
 
+## 💬 Spec
+
+### Options
+
+| Property | Required | Description | Default |
+| --- | --- | :---: | --- | --- |
+| **prometheus.endpoint** | yes | Prometheus hostname | |
+| **prometheus.baseURL** | no | Prometheus metric path | "/api/v1" |
+| **query** | yes | Prometheus query |  |
+| **timeRange.type** | no | Time range type: absolute or relative | "absolute" |
+| **timeRange.start** | yes | Time range start: Date object (absolute) or integer (relative) |  |
+| **timeRange.end** | yes | Time range end: Date object (absolute) or integer (relative) |  |
+| **timeRange.step** | no | Time between 2 data points | auto |
+| **timeRange.minStep** | no | Min time between 2 data points | null |
+| **timeRange.msUpdateInterval** | no | Update interval | 1s |
+| **noData.message** | no | Empty chart message | "No data to display" |
+| **noData.font** | no | Font of empty chart message | "16px normal 'Helvetica Nueue'" |
+| **fillGaps** | no | Insert NaN values when values are missing in time range | false |
+| **tension** | no | Bezier curve tension of the line. Set to 0 to draw straightlines. This option is ignored if monotone cubic interpolation is used | 0.4 |
+| **cubicInterpolationMode** | no | "default" or "monotone" | "default" |
+| **stepped** | no | false, true, "before", "middle" or "after" | false |
+| **fill** | no | Fills the area under the line | false |
+| **borderWidth** | no | Should I explain this field? | 3 |
+| **borderColor** | no | Should I explain this field? | "rgba(0, 0, 0, 0.1)" |
+
+### Hooks
+
+| Property | Required | Description | Prototype |
+| --- | --- | :---: | --- | --- |
+| **findInLabelMap** | no | Custom serie label | ? |
+| **findInBorderColorMap** | no | Custom serie line color | ? |
+| **findInBackgroundColorMap** | no | Custom serie background color | ? |
+| **dataSetHook** | no | Modify data on the fly, right before display | (datasets: object[]) => object[] |
+
 ## 🤯 Troubleshooting
 
 #### CORS
@@ -124,14 +162,23 @@ There are many ways to contribute: writing code, documentation, reporting issues
 * Twitter: [@samuelberthe](https://twitter.com/samuelberthe)
 * Github: [@samber](https://github.com/samber)
 
+👤 **Frantisek Svoboda**
+
+* Twitter: [@sFrenkie](https://twitter.com/sFrenkie)
+* Github: [@sFrenkie](https://github.com/sFrenkie)
+
+
 ## 💫 Show your support
 
 Give a ⭐️ if this project helped you!
 
 [![support us](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/samber)
+[![support us](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/sfrenkie)
 
 ## 📝 License
 
 Copyright © 2020 [Samuel Berthe](https://github.com/samber).
+
+Copyright © 2020 [Frantisek Svoboda](https://github.com/sfrenkie).
 
 This project is [MIT](./LICENSE) licensed.
