@@ -84,6 +84,7 @@ export default {
             ],
             'borderWidth': 3,
             'fillGaps': false,
+            'dataSetHook': null,
         };
 
         return Object.assign(dEfault, options);

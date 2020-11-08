@@ -2,8 +2,14 @@ import PrometheusQuery from 'prometheus-query';
 import datasource from './datasource';
 import opt from './options';
 import {
-    setTimeAxesOptions
+    setTimeAxesOptions,
+    fillGaps,
 } from './axes';
+import {
+    selectLabel,
+    selectBackGroundColor,
+    selectBorderColor,
+} from './serie';
 
 export default {
     id: 'datasource-prometheus',
@@ -37,7 +43,7 @@ export default {
             end
         } = datasource.getStartAndEndDates(_options['timeRange'])
         const expectedStep = _options['timeRange']['step'] || datasource.getPrometheusStepAuto(start, end, chart.width);
-        const minStep = (_options.minStep || expectedStep);
+        const minStep = (_options['timeRange']['minStep'] || expectedStep);
         const step = minStep >= expectedStep ? minStep : expectedStep;
         if (!!chart['datasource-prometheus'] && 
         chart['datasource-prometheus']['step'] == step &&
@@ -54,12 +60,12 @@ export default {
         pq.rangeQuery(query, start, end, step)
             .then((res) => {
                 if (res.result.length > 0) {
-                    var isHiddenMap = {};
+                    let isHiddenMap = {};
                     if (chart.data.datasets.length > 0) {
-                        for(var oldDataSetKey in chart.data.datasets){
-                            var oldDataSet = chart.data.datasets[oldDataSetKey];
-                            var metaIndex = 0;
-                            for (var id in oldDataSet._meta ){ metaIndex = id; }
+                        for (let oldDataSetKey in chart.data.datasets) {
+                            const oldDataSet = chart.data.datasets[oldDataSetKey];
+                            let metaIndex = 0;
+                            for (let id in oldDataSet._meta) { metaIndex = id; }
                             isHiddenMap[oldDataSet.label] = !chart.isDatasetVisible(oldDataSet._meta[metaIndex].index);
                         }
                     }
@@ -108,21 +114,16 @@ export default {
     beforeRender: (chart, options) => {
         const _options = opt.defaultOptionsValues(options);
         if (chart.data.datasets.length == 0) {
-            var ctx = chart.chart.ctx;
-            var width = chart.chart.width;
-            var height = chart.chart.height;
+            const ctx = chart.chart.ctx;
+            const width = chart.chart.width;
+            const height = chart.chart.height;
             chart.clear();
     
             ctx.save();
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            if (_options.noData){
-                ctx.font = _options.noData.font;
-                ctx.fillText(_options.noData.message, width / 2, height / 2);
-            } else {
-                ctx.font = "16px normal 'Helvetica Nueue'";
-                ctx.fillText('No data to display', width / 2, height / 2);
-            }
+            ctx.font = _options.noData && _options.noData.font ? _options.noData.font : "16px normal 'Helvetica Nueue'";
+            ctx.fillText(_options.noData && _options.noData.message ? _options.noData.message : 'No data to display', width / 2, height / 2);
             ctx.restore();
             return false;
         }
