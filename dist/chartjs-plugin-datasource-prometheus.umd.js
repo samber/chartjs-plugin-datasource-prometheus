@@ -1738,8 +1738,8 @@
 	              data: body,
 	              headers: this.headers,
 	              auth: {
-	                  username: this.proxy.username,
-	                  password: this.proxy.password
+	                  username: this.auth.username,
+	                  password: this.auth.password
 	              },
 	              proxy: (!!this.proxy.host && !!this.proxy.port) ? {
 	                  host: this.proxy.host,
