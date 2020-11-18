@@ -7,7 +7,7 @@ const setTimeAxesOptions = (chart, start, end) => {
     chart.config.options.scales.xAxes[0].time = !!chart.config.options.scales.xAxes[0].time ? chart.config.options.scales.xAxes[0].time : {};
     chart.config.options.scales.xAxes[0].time.displayFormats = !!chart.config.options.scales.xAxes[0].time.displayFormats ? chart.config.options.scales.xAxes[0].time.displayFormats : 'MMM D, hA'; // override default momentjs format for 'hour' time unit
 
-    chart.config.options.scales.xAxes[0].type = chart.config.options.scales.xAxes[0].type || 'time';
+    chart.config.options.scales.xAxes[0].type = 'time';
     chart.config.options.scales.xAxes[0].distribution = chart.config.options.scales.xAxes[0].distribution || 'linear';
     chart.config.options.scales.xAxes[0].time.minUnit = chart.config.options.scales.xAxes[0].time.minUnit || 'second';
 }
