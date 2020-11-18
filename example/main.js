@@ -1,17 +1,24 @@
-var ctx = document.getElementById('myChart').getContext('2d');
+const form = document.querySelector('form#refresh-form');
+const endpointInput = document.querySelector('form#refresh-form input#endpoint');
+const queryInput = document.querySelector('form#refresh-form input#query');
+const btn = document.querySelector('form#refresh-form button');
+const ctx = document.querySelector('#myChart canvas').getContext('2d');
 
-const query = 'sum by (job) (go_gc_duration_seconds)';
-// const query = 'node_load1';
+endpointInput.value = 'http://demo.robustperception.io:9090/';
+
+queryInput.value = 'sum by (job) (go_gc_duration_seconds)';
+// queryInput.value = 'go_memstats_heap_objects';
+// queryInput.value = 'node_load1';
 
 // // absolute
 // const start = new Date(new Date().getTime() - (60 * 60 * 1000));
 // const end = new Date();
 
 // relative
-const start = -12 * 60 * 60 * 1000;
+const start = -1 * 60 * 60 * 1000;
 const end = 0; // now
 
-var myChart = new Chart(ctx, {
+const myChart = new Chart(ctx, {
     type: 'line',
     data: {},
     options: {
@@ -19,14 +26,13 @@ var myChart = new Chart(ctx, {
         plugins: {
             'datasource-prometheus': {
                 prometheus: {
-                    endpoint: "http://demo.robustperception.io:9090/",
+                    endpoint: endpointInput.value,
                 },
-                query: query,
+                query: queryInput.value,
                 timeRange: {
                     type: 'relative',
                     start: start,
                     end: end,
-                    msUpdateInterval: 5 * 1000,
                 },
             },
         },
@@ -36,6 +42,9 @@ var myChart = new Chart(ctx, {
     ],
 });
 
-document.getElementById('updateBtn').addEventListener('click', () => {
+form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    myChart.options.plugins['datasource-prometheus'].prometheus.endpoint = endpointInput.value;
+    myChart.options.plugins['datasource-prometheus'].query = queryInput.value;
     myChart.update();
 });
