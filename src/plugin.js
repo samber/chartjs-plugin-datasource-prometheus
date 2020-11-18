@@ -59,6 +59,8 @@ export default {
         chart['datasource-prometheus']['start'] = start;
         chart['datasource-prometheus']['end'] = end;
 
+        chart['datasource-prometheus']['error'] = null;
+
         const pq = new PrometheusQuery(prometheus);
 
         pq.rangeQuery(query, start, end, step)
@@ -107,17 +109,39 @@ export default {
                     chart['datasource-prometheus']['loading'] = true;
                     chart.update();
                     chart['datasource-prometheus']['loading'] = false;
-
                 } else {
                     chart.data.datasets = []; // no data
                 }
+            })
+            .catch((err) => {
+                // reset data and axes
+                chart.data.datasets = [];
+                setTimeAxesOptions(chart);
+
+                chart['datasource-prometheus']['error'] = 'Failed to fetch data';
+
+                throw err;
             });
 
         return true;
     },
     beforeRender: (chart, options) => {
         const _options = opt.defaultOptionsValues(options);
-        if (chart.data.datasets.length == 0) {
+
+        if (chart['datasource-prometheus']['error'] != null) {
+            const ctx = chart.chart.ctx;
+            const width = chart.chart.width;
+            const height = chart.chart.height;
+            chart.clear();
+    
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = "16px normal 'Helvetica Nueue'";
+            ctx.fillText(chart['datasource-prometheus']['error'], width / 2, height / 2);
+            ctx.restore();
+            return false;
+        } else if (chart.data.datasets.length == 0) {
             const ctx = chart.chart.ctx;
             const width = chart.chart.width;
             const height = chart.chart.height;

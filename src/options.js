@@ -87,7 +87,7 @@ export default {
             'dataSetHook': null,
         };
 
-        return Object.assign(dEfault, options);
+        return Object.assign({}, dEfault, options);
     }
 
 };
