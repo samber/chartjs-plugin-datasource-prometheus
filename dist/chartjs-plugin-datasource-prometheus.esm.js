@@ -76,9 +76,9 @@ var opt = {
             throw new Error('options.timeRange.start must be a Date object (absolute) or integer (relative)');
         if (!(typeof (options['timeRange']['end']) == 'number' || (typeof (options['timeRange']['end']) == 'object' && options['timeRange']['end'].constructor.name == 'Date')))
             throw new Error('options.timeRange.end must be a Date object (absolute) or integer (relative)');
-        if (typeof (options['timeRange']['msUpdateInterval']) != 'number')
+        if (options['timeRange']['msUpdateInterval'] != null && typeof (options['timeRange']['msUpdateInterval']) != 'number')
             throw new Error('options.timeRange.msUpdateInterval must be a integer');
-        if (options['timeRange']['msUpdateInterval'] < 1000)
+        if (options['timeRange']['msUpdateInterval'] != null && options['timeRange']['msUpdateInterval'] < 1000)
             throw new Error('options.timeRange.msUpdateInterval must be greater than 1s.');
     },
 
@@ -133,7 +133,7 @@ var opt = {
             'dataSetHook': null,
         };
 
-        return Object.assign(dEfault, options);
+        return Object.assign({}, dEfault, options);
     }
 
 };
@@ -146,7 +146,7 @@ const setTimeAxesOptions = (chart, start, end) => {
     chart.config.options.scales.xAxes[0].time = !!chart.config.options.scales.xAxes[0].time ? chart.config.options.scales.xAxes[0].time : {};
     chart.config.options.scales.xAxes[0].time.displayFormats = !!chart.config.options.scales.xAxes[0].time.displayFormats ? chart.config.options.scales.xAxes[0].time.displayFormats : 'MMM D, hA'; // override default momentjs format for 'hour' time unit
 
-    chart.config.options.scales.xAxes[0].type = chart.config.options.scales.xAxes[0].type || 'time';
+    chart.config.options.scales.xAxes[0].type = 'time';
     chart.config.options.scales.xAxes[0].distribution = chart.config.options.scales.xAxes[0].distribution || 'linear';
     chart.config.options.scales.xAxes[0].time.minUnit = chart.config.options.scales.xAxes[0].time.minUnit || 'second';
 };
@@ -216,10 +216,14 @@ var ChartDatasourcePrometheusPlugin = {
         opt.assertPluginOptions(options); // triggers exceptions
 
         // auto update
-        if (!!options && !!options['timeRange'] && !!options['timeRange']['msUpdateInterval'])
-            chart['datasource-prometheus']['updateInterval'] = setInterval(() => {
+        if (!!options && !!options['timeRange']) {
+            if (!!options['timeRange']['msUpdateInterval'])
+                chart['datasource-prometheus']['updateInterval'] = setInterval(() => {
+                    chart.update();
+                }, options['timeRange']['msUpdateInterval']);
+            else
                 chart.update();
-            }, options['timeRange']['msUpdateInterval']);
+        }
     },
 
     beforeUpdate: (chart, options) => {
@@ -246,6 +250,8 @@ var ChartDatasourcePrometheusPlugin = {
         chart['datasource-prometheus']['step'] = step;
         chart['datasource-prometheus']['start'] = start;
         chart['datasource-prometheus']['end'] = end;
+
+        chart['datasource-prometheus']['error'] = null;
 
         const pq = new PrometheusQuery(prometheus);
 
@@ -295,17 +301,39 @@ var ChartDatasourcePrometheusPlugin = {
                     chart['datasource-prometheus']['loading'] = true;
                     chart.update();
                     chart['datasource-prometheus']['loading'] = false;
-
                 } else {
                     chart.data.datasets = []; // no data
                 }
+            })
+            .catch((err) => {
+                // reset data and axes
+                chart.data.datasets = [];
+                setTimeAxesOptions(chart);
+
+                chart['datasource-prometheus']['error'] = 'Failed to fetch data';
+
+                throw err;
             });
 
         return true;
     },
     beforeRender: (chart, options) => {
         const _options = opt.defaultOptionsValues(options);
-        if (chart.data.datasets.length == 0) {
+
+        if (chart['datasource-prometheus']['error'] != null) {
+            const ctx = chart.chart.ctx;
+            const width = chart.chart.width;
+            const height = chart.chart.height;
+            chart.clear();
+    
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = "16px normal 'Helvetica Nueue'";
+            ctx.fillText(chart['datasource-prometheus']['error'], width / 2, height / 2);
+            ctx.restore();
+            return false;
+        } else if (chart.data.datasets.length == 0) {
             const ctx = chart.chart.ctx;
             const width = chart.chart.width;
             const height = chart.chart.height;
