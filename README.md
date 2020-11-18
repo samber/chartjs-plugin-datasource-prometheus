@@ -1,7 +1,7 @@
 # Welcome to chartjs-plugin-datasource-prometheus 👋
 
 [![NPM version](https://img.shields.io/npm/v/chartjs-plugin-datasource-prometheus.svg?style=flat-square)](https://npmjs.com/package/chartjs-plugin-datasource-prometheus)
-<a href="https://www.jsdelivr.com/package/npm/chartjs-plugin-datasource-prometheus"><img src="https://data.jsdelivr.com/v1/package/npm/chartjs-plugin-datasource-prometheus/badge" alt="jsDelivr Downloads"></img></a>
+<a href="https://www.jsdelivr.com/package/npm/chartjs-plugin-datasource-prometheus"><img src="https://data.jsdelivr.com/v1/package/npm/chartjs-plugin-datasource-prometheus/badge" alt="jsDelivr Downloads"></a>
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#)
 
 > A Prometheus datasource for ChartJS.
@@ -14,6 +14,10 @@
 - requires [moment.js](https://momentjs.com/) 2.0 or later.
 - requires [prometheus-query](https://github.com/samber/prometheus-query-js) 2.0 or later.
 
+#### Demonstration:
+
+[https://samber.github.io/chartjs-plugin-datasource-prometheus/example/](https://samber.github.io/chartjs-plugin-datasource-prometheus/example/)
+
 ## ✨ Features
 
 - Loads time-series from Prometheus into Chart.js.
@@ -24,6 +28,7 @@
 - Date interval can be **absolute** or **relative** to `now`
 - Hooks available (styling, labeling, data presentation...)
 - Empty chart message
+- Error message on Prometheus http request failure
 - Break or continuous lines when gap in data
 - Line styling
 
