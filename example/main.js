@@ -26,7 +26,7 @@ const myChart = new Chart(ctx, {
         plugins: {
             'datasource-prometheus': {
                 prometheus: {
-                    endpoint: endpointInput.value,
+                    endpoint: getEndpoint(),
                 },
                 query: queryInput.value,
                 timeRange: {
@@ -42,9 +42,19 @@ const myChart = new Chart(ctx, {
     ],
 });
 
+function getEndpoint() {
+    // demo.robustperception.io does not support HTTPS
+    // but Github Pages use HTTPS
+    // then we need this bullshit to prevent requests to insecure endpoint
+    // https://github.com/RobustPerception/demo_prometheus_ansible/issues/5
+    if (endpointInput.value == 'http://demo.robustperception.io:9090/')
+        return 'https://cors-anywhere.herokuapp.com/' + endpointInput.value;
+    return endpointInput.value;
+}
+
 form.addEventListener('submit', (event) => {
     event.preventDefault();
-    myChart.options.plugins['datasource-prometheus'].prometheus.endpoint = endpointInput.value;
+    myChart.options.plugins['datasource-prometheus'].prometheus.endpoint = getEndpoint();
     myChart.options.plugins['datasource-prometheus'].query = queryInput.value;
     myChart.update();
 });
