@@ -24,10 +24,14 @@ export default {
         opt.assertPluginOptions(options); // triggers exceptions
 
         // auto update
-        if (!!options && !!options['timeRange'] && !!options['timeRange']['msUpdateInterval'])
-            chart['datasource-prometheus']['updateInterval'] = setInterval(() => {
+        if (!!options && !!options['timeRange']) {
+            if (!!options['timeRange']['msUpdateInterval'])
+                chart['datasource-prometheus']['updateInterval'] = setInterval(() => {
+                    chart.update();
+                }, options['timeRange']['msUpdateInterval']);
+            else
                 chart.update();
-            }, options['timeRange']['msUpdateInterval']);
+        }
     },
 
     beforeUpdate: (chart, options) => {

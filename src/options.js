@@ -30,9 +30,9 @@ export default {
             throw new Error('options.timeRange.start must be a Date object (absolute) or integer (relative)');
         if (!(typeof (options['timeRange']['end']) == 'number' || (typeof (options['timeRange']['end']) == 'object' && options['timeRange']['end'].constructor.name == 'Date')))
             throw new Error('options.timeRange.end must be a Date object (absolute) or integer (relative)');
-        if (typeof (options['timeRange']['msUpdateInterval']) != 'number')
+        if (options['timeRange']['msUpdateInterval'] != null && typeof (options['timeRange']['msUpdateInterval']) != 'number')
             throw new Error('options.timeRange.msUpdateInterval must be a integer');
-        if (options['timeRange']['msUpdateInterval'] < 1000)
+        if (options['timeRange']['msUpdateInterval'] != null && options['timeRange']['msUpdateInterval'] < 1000)
             throw new Error('options.timeRange.msUpdateInterval must be greater than 1s.');
     },
 

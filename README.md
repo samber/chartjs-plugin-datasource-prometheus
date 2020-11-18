@@ -95,9 +95,6 @@ var myChart = new Chart(ctx, {
           // from 12 hours ago to now
           start: -12 * 60 * 60 * 1000,
           end: end,
-
-          // refresh every 5s
-          msUpdateInterval: 5 * 1000,
         },
       },
     },
@@ -117,9 +114,9 @@ var myChart = new Chart(ctx, {
 | **timeRange.type** | no | Time range type: absolute or relative | "absolute" |
 | **timeRange.start** | yes | Time range start: Date object (absolute) or integer (relative) |  |
 | **timeRange.end** | yes | Time range end: Date object (absolute) or integer (relative) |  |
-| **timeRange.step** | no | Time between 2 data points | auto |
+| **timeRange.step** | no | Time between 2 data points | [computed] |
 | **timeRange.minStep** | no | Min time between 2 data points | null |
-| **timeRange.msUpdateInterval** | no | Update interval | 1s |
+| **timeRange.msUpdateInterval** | no | Update interval in millisecond | 1000 |
 | **noData.message** | no | Empty chart message | "No data to display" |
 | **noData.font** | no | Font of empty chart message | "16px normal 'Helvetica Nueue'" |
 | **fillGaps** | no | Insert NaN values when values are missing in time range | false |
