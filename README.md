@@ -99,7 +99,7 @@ var myChart = new Chart(ctx, {
 
           // from 12 hours ago to now
           start: -12 * 60 * 60 * 1000,
-          end: end,
+          end: 0,
         },
       },
     },
