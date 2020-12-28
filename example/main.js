@@ -20,7 +20,7 @@ const end = 0; // now
 
 const myChart = new Chart(ctx, {
     type: 'line',
-    data: {},
+    plugins: [ChartDatasourcePrometheusPlugin],
     options: {
         scales: {},
         plugins: {
@@ -38,9 +38,6 @@ const myChart = new Chart(ctx, {
             },
         },
     },
-    plugins: [
-        ChartDatasourcePrometheusPlugin,
-    ],
 });
 
 function getEndpoint() {

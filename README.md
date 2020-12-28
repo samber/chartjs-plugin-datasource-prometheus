@@ -145,26 +145,20 @@ var myChart = new Chart(ctx, {
 
 ### Multiple queries in one chart
 
-The `query` field can be an array of queries.
+The `query` field can be an array of queries. Returned series are aggregated in a single chart.
 
-In case you want to show those queries on different axes, you can define it with `options.scales.yAxes` field.
+In case you want to show those queries on different axes, you can define a custom `options.scales.yAxes` field.
 
 ```js
 var myChart = new Chart(ctx, {
     type: 'line',
-    data: {},
+    plugins: [ChartDatasourcePrometheusPlugin],
     options: {
         scales: {
             yAxes: [
-                {
-                    position: 'left',
-                },
-                {
-                    position: 'left',
-                },
-                {
-                    position: 'right',
-                },
+                {position: 'left'},
+                {position: 'left'},
+                {position: 'right'},
             ]
         },
         plugins: {
@@ -183,9 +177,6 @@ var myChart = new Chart(ctx, {
             },
         },
     },
-    plugins: [
-        ChartDatasourcePrometheusPlugin,
-    ],
 });
 ```
 
@@ -227,7 +218,6 @@ There are many ways to contribute: writing code, documentation, reporting issues
 Give a ⭐️ if this project helped you!
 
 [![support us](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/samber)
-[![support us](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/sfrenkie)
 
 ## 📝 License
 

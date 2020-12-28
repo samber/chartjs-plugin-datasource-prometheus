@@ -6,7 +6,7 @@
 npm run dev
 ```
 
-Open example/index.html
+Open ./example/index.html
 
 ### Test
 
