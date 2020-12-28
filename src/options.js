@@ -19,8 +19,10 @@ export default {
         if (options['timeRange']['end'] == null)
             throw new Error('options.timeRange.end is undefined');
 
-        if (typeof (options['query']) != 'string')
-            throw new Error('options.query must be a string');
+        if (typeof (options['query']) != 'string' && !(typeof (options['query']) == 'object' && options['query'].constructor.name == 'Array'))
+            throw new Error('options.query must be a string or an array of strings');
+        if (typeof (options['query']) == 'object' && options['query'].constructor.name == 'Array' && (options['query'].length == 0 || options['query'].length > 10))
+            throw new Error('options.query must contains between 1 and 10 queries');
 
         if (typeof (options['timeRange']) != 'object')
             throw new Error('options.timeRange must be a object');
@@ -88,6 +90,12 @@ export default {
         };
 
         return Object.assign({}, dEfault, options);
+    },
+
+    getQueries: (options)=> {
+        if (typeof (options['query']) == 'string')
+            return [options['query']];
+        return options['query'];
     }
 
 };

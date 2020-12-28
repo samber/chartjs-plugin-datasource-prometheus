@@ -6,7 +6,7 @@
 
 > A Prometheus datasource for ChartJS.
 
-![screenshot](./screenshot.png)
+![screenshot](./doc/img/screenshot.png)
 
 #### Dependencies:
 
@@ -115,7 +115,7 @@ var myChart = new Chart(ctx, {
 | --- | :---: | --- | --- |
 | **prometheus.endpoint** | yes | Prometheus hostname | |
 | **prometheus.baseURL** | no | Prometheus metric path | `"/api/v1"` |
-| **query** | yes | Prometheus query |  |
+| **query** | yes | Prometheus query: string or string[] |  |
 | **timeRange.type** | no | Time range type: absolute or relative | `"absolute"` |
 | **timeRange.start** | yes | Time range start: Date object (absolute) or integer (relative) |  |
 | **timeRange.end** | yes | Time range end: Date object (absolute) or integer (relative) |  |
@@ -140,6 +140,56 @@ var myChart = new Chart(ctx, {
 | **findInBorderColorMap** | no | Custom serie line color | ? |
 | **findInBackgroundColorMap** | no | Custom serie background color | ? |
 | **dataSetHook** | no | Modify data on the fly, right before display | `datasets: object[] => object[]` |
+
+## Examples
+
+### Multiple queries in one chart
+
+The `query` field can be an array of queries.
+
+In case you want to show those queries on different axes, you can define it with `options.scales.yAxes` field.
+
+```js
+var myChart = new Chart(ctx, {
+    type: 'line',
+    data: {},
+    options: {
+        scales: {
+            yAxes: [
+                {
+                    position: 'left',
+                },
+                {
+                    position: 'left',
+                },
+                {
+                    position: 'right',
+                },
+            ]
+        },
+        plugins: {
+            'datasource-prometheus': {
+                prometheus: {
+                    endpoint: "http://demo.robustperception.io:9090",
+                },
+                query: ['node_load1', 'node_load5', 'node_load15'],
+                timeRange: {
+                    type: 'relative',
+
+                    // from 12 hours ago to now
+                    start: -12 * 60 * 60 * 1000,
+                    end: end,
+                },
+            },
+        },
+    },
+    plugins: [
+        ChartDatasourcePrometheusPlugin,
+    ],
+});
+```
+
+![screenshot](./doc/img/screenshot-multiple-queries.png)
 
 ## 🤯 Troubleshooting
 

@@ -6,6 +6,8 @@
 npm run dev
 ```
 
+Open example/index.html
+
 ### Test
 
 ```bash

@@ -69,8 +69,10 @@ var opt = {
         if (options['timeRange']['end'] == null)
             throw new Error('options.timeRange.end is undefined');
 
-        if (typeof (options['query']) != 'string')
-            throw new Error('options.query must be a string');
+        if (typeof (options['query']) != 'string' && !(typeof (options['query']) == 'object' && options['query'].constructor.name == 'Array'))
+            throw new Error('options.query must be a string or an array of strings');
+        if (typeof (options['query']) == 'object' && options['query'].constructor.name == 'Array' && (options['query'].length == 0 || options['query'].length > 10))
+            throw new Error('options.query must contains between 1 and 10 queries');
 
         if (typeof (options['timeRange']) != 'object')
             throw new Error('options.timeRange must be a object');
@@ -138,6 +140,12 @@ var opt = {
         };
 
         return Object.assign({}, dEfault, options);
+    },
+
+    getQueries: (options)=> {
+        if (typeof (options['query']) == 'string')
+            return [options['query']];
+        return options['query'];
     }
 
 };
@@ -237,11 +245,8 @@ var ChartDatasourcePrometheusPlugin = {
             return true;
 
         const prometheus = _options['prometheus'];
-        const query = _options['query'];
-        const {
-            start,
-            end
-        } = datasource.getStartAndEndDates(_options['timeRange']);
+        const queries = opt.getQueries(_options);
+        const { start, end } = datasource.getStartAndEndDates(_options['timeRange']);
         const expectedStep = _options['timeRange']['step'] || datasource.getPrometheusStepAuto(start, end, chart.width);
         const minStep = (_options['timeRange']['minStep'] || expectedStep);
         const step = minStep >= expectedStep ? minStep : expectedStep;
@@ -259,21 +264,36 @@ var ChartDatasourcePrometheusPlugin = {
 
         const pq = new PrometheusQuery(prometheus);
 
-        pq.rangeQuery(query, start, end, step)
-            .then((res) => {
-                if (res.result.length > 0) {
-                    let isHiddenMap = {};
-                    if (chart.data.datasets.length > 0) {
-                        for (let oldDataSetKey in chart.data.datasets) {
-                            const oldDataSet = chart.data.datasets[oldDataSetKey];
-                            let metaIndex = 0;
-                            for (let id in oldDataSet._meta) { metaIndex = id; }
-                            isHiddenMap[oldDataSet.label] = !chart.isDatasetVisible(oldDataSet._meta[metaIndex].index);
-                        }
-                    }
+        const reqs = queries.map((query) => {
+            return pq.rangeQuery(query, start, end, step);
+        });
 
-                    chart.data.datasets = res.result.map((serie, i) => {
+        // look for previously hidden series
+        let isHiddenMap = {};
+        if (chart.data.datasets.length > 0) {
+            for (let oldDataSetKey in chart.data.datasets) {
+                const oldDataSet = chart.data.datasets[oldDataSetKey];
+                let metaIndex = 0;
+                for (let id in oldDataSet._meta) { metaIndex = id; }
+                isHiddenMap[oldDataSet.label] = !chart.isDatasetVisible(oldDataSet._meta[metaIndex].index);
+            }
+        }
+
+        const yAxes = chart.config.options.scales.yAxes;
+
+        // loop over queries
+        // when we get all query results, we mix series into a single `datasets` array
+        Promise.all(reqs)
+            .then((results) => {
+                // extract data from responses and prepare series for Chart.js
+                const datasets = results.reduce((datasets, result, queryIndex) => {
+                    if (result.result.length == 0)
+                        return datasets;
+
+                    const seriesCount = datasets.length;
+                    const data = result.result.map((serie, i) => {
                         return {
+                            yAxisID: !!yAxes && yAxes.length > 0 ? yAxes[queryIndex % yAxes.length].id : null,
                             tension: _options.tension || 0.4,
                             stepped: _options.stepped || false,
                             cubicInterpolationMode: _options.cubicInterpolationMode || 'default',
@@ -285,13 +305,20 @@ var ChartDatasourcePrometheusPlugin = {
                                     y: v.value,
                                 };
                             }),
-                            backgroundColor: selectBackGroundColor(_options, serie, i),
-                            borderColor: selectBorderColor(_options, serie, i),
+                            backgroundColor: selectBackGroundColor(_options, serie, seriesCount + i),
+                            borderColor: selectBorderColor(_options, serie, seriesCount + i),
                             borderWidth: _options.borderWidth,
                             hidden: isHiddenMap[selectLabel(_options, serie)] || false,
                         };
                     });
 
+                    return datasets.concat(...data);
+                }, []);
+
+                chart.data.datasets = datasets;
+
+                // in case there is some data, we make things beautiful
+                if (chart.data.datasets.length > 0) {
                     if (_options.fillGaps) {
                         fillGaps(chart, start, end, step, _options);
                     }
@@ -305,8 +332,6 @@ var ChartDatasourcePrometheusPlugin = {
                     chart['datasource-prometheus']['loading'] = true;
                     chart.update();
                     chart['datasource-prometheus']['loading'] = false;
-                } else {
-                    chart.data.datasets = []; // no data
                 }
             })
             .catch((err) => {

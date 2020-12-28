@@ -28,6 +28,7 @@ const myChart = new Chart(ctx, {
                 prometheus: {
                     endpoint: getEndpoint(),
                 },
+                // query: ['node_load1', 'node_load5', 'node_load15'],
                 query: queryInput.value,
                 timeRange: {
                     type: 'relative',
