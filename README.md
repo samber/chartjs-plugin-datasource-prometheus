@@ -139,7 +139,7 @@ var myChart = new Chart(ctx, {
 | **findInLabelMap** | no | Custom serie label | ? |
 | **findInBorderColorMap** | no | Custom serie line color | ? |
 | **findInBackgroundColorMap** | no | Custom serie background color | ? |
-| **dataSetHook** | no | Modify data on the fly, right before display | datasets: object[] => object[] |
+| **dataSetHook** | no | Modify data on the fly, right before display | `datasets: object[] => object[]` |
 
 ## 🤯 Troubleshooting
 
@@ -156,6 +156,8 @@ Please read the [security advisory](https://github.com/samber/prometheus-query-j
 The Prometheus Datasource is open source and contributions from community (you!) are welcome.
 
 There are many ways to contribute: writing code, documentation, reporting issues...
+
+[How-to](./CONTRIBUTING.md)
 
 ## Author
 
