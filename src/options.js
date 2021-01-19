@@ -86,6 +86,10 @@ export default {
             ],
             'borderWidth': 3,
             'fillGaps': false,
+
+            'findInLabelMap': null,
+            'findInBorderColorMap': null,
+            'findInBackgroundColorMap': null,
             'dataSetHook': null,
         };
 
