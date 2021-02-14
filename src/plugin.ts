@@ -2,9 +2,8 @@
 import { PrometheusDriver, QueryResult } from 'prometheus-query';
 import { Chart, ChartDataSets, PluginServiceGlobalRegistration, PluginServiceRegistrationOptions } from 'chart.js';
 
-// import { chartJSLinearInstance } from './chartjs';
 import datasource from './datasource';
-import { ChartDatasourcePrometheusPluginOptions } from './options';
+import { ChartDatasourcePrometheusPluginOptions, PrometheusQuery } from './options';
 import {
     setTimeAxesOptions,
     fillGaps,
@@ -54,7 +53,7 @@ export class ChartDatasourcePrometheusPlugin implements PluginServiceGlobalRegis
         const options = Object.assign(new ChartDatasourcePrometheusPluginOptions(), _options);
 
         const prometheus = options.prometheus;
-        const queries: string[] = options.getQueries();
+        const queries: PrometheusQuery[] = options.getQueries();
         const { start, end } = datasource.getStartAndEndDates(options.timeRange);
         const expectedStep = options.timeRange.step || datasource.getPrometheusStepAuto(start, end, chart.width);
         const minStep = (options.timeRange.minStep || expectedStep);
@@ -71,11 +70,7 @@ export class ChartDatasourcePrometheusPlugin implements PluginServiceGlobalRegis
 
         chart['datasource-prometheus'].error = null;
 
-        const p: PrometheusDriver = new PrometheusDriver(prometheus);
-
-        const reqs: Promise<QueryResult>[] = queries.map((query: string) => {
-            return p.rangeQuery(query, start, end, step);
-        });
+        const reqs: Promise<QueryResult>[] = datasource.executeQueries(prometheus, queries, start, end, step);
 
         // look for previously hidden series
         let isHiddenMap = {};
