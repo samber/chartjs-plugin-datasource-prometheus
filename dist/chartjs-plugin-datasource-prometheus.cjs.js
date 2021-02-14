@@ -1,398 +1,388 @@
 'use strict';
 
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+Object.defineProperty(exports, '__esModule', { value: true });
 
-require('chart.js');
-var PrometheusQuery = _interopDefault(require('prometheus-query'));
+var prometheusQuery = require('prometheus-query');
 
 // Min step is 1s
 const PROMETHEUS_QUERY_RANGE_MIN_STEP = 1;
-
 var datasource = {
-
     /**
      * Compute a step for range_query (interval between 2 points in second)
      * Min step: 1s
      * Default: 1 step every 25px
-     * @param {Date} start 
+     * @param {Date} start
      * @param {Date} end
-     * @param {number} chartWidth: width in pixel 
+     * @param {number} chartWidth: width in pixel
      */
     getPrometheusStepAuto: (start, end, chartWidth) => {
         const secondDuration = (end.getTime() - start.getTime()) / 1000;
         const step = Math.floor(secondDuration / chartWidth) * 25;
         return step < PROMETHEUS_QUERY_RANGE_MIN_STEP ? PROMETHEUS_QUERY_RANGE_MIN_STEP : step;
     },
-
     /**
      * Return Date objects containing the start and end date of interval.
      * Relative dates are computed to absolute
-     * @param {object} timeRange 
+     * @param {object} timeRange
      */
     getStartAndEndDates(timeRange) {
         // default to "absolute"
-        timeRange['type'] = !!timeRange['type'] ? timeRange['type'] : 'absolute';
-
-        if (timeRange['type'] === 'absolute') {
+        timeRange.type = !!timeRange.type ? timeRange.type : 'absolute';
+        if (timeRange.type === 'absolute') {
             return {
+                type: 'absolute',
                 start: timeRange['start'],
-                end: timeRange['end']
+                end: timeRange['end'],
             };
-        } else if (timeRange['type'] === 'relative') {
+        }
+        else if (timeRange.type === 'relative') {
             return {
-                start: new Date(new Date().getTime() + timeRange['start']),
-                end: new Date(new Date().getTime() + timeRange['end']),
+                type: 'absolute',
+                start: new Date(new Date().getTime() + timeRange.start),
+                end: new Date(new Date().getTime() + timeRange.end),
             };
         }
         throw new Error('Unexpected options.timeRange value.');
     }
-
 };
 
-// Min step is 1s
-
-var opt = {
-
+// Mixin for TimeRange field
+class PrometheusTimeRange {
+    constructor() {
+        this.step = null;
+        this.minStep = null;
+        this.msUpdateInterval = null;
+    }
+}
+class ChartDatasourcePrometheusPluginNoDataMsg {
+    constructor() {
+        this.message = 'No data to display';
+        this.font = '16px normal \'Helvetica Nueue\'';
+        this.textAlign = 'center';
+        this.textBaseline = 'middle';
+        this.direction = 'ltr';
+    }
+}
+class ChartDatasourcePrometheusPluginErrorMsg {
+    constructor() {
+        this.message = null;
+        this.font = '16px normal \'Helvetica Nueue\'';
+        this.textAlign = 'center';
+        this.textBaseline = 'middle';
+        this.direction = 'ltr';
+    }
+}
+class ChartDatasourcePrometheusPluginOptions {
+    constructor() {
+        /**
+         * Options for designing Charts
+         * See https://learnui.design/tools/data-color-picker.html#palette
+         */
+        this.fillGaps = false;
+        this.tension = 0.4;
+        this.cubicInterpolationMode = 'default';
+        this.stepped = false;
+        this.fill = false;
+        this.borderWidth = 3;
+        this.borderColor = [
+            // 'rgba(0, 63, 92, 1)',
+            // 'rgba(47, 75, 124, 1)',
+            // 'rgba(102, 81, 145, 1)',
+            // 'rgba(160, 81, 149, 1)',
+            // 'rgba(212, 80, 135, 1)',
+            // 'rgba(249, 93, 106, 1)',
+            // 'rgba(255, 124, 67, 1)',
+            // 'rgba(255, 166, 0, 1)',
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)'
+        ];
+        this.backgroundColor = [
+            'transparent',
+            'transparent',
+            'transparent',
+            'transparent',
+            'transparent',
+            'transparent',
+            'transparent',
+            'transparent',
+        ];
+        this.noDataMsg = new ChartDatasourcePrometheusPluginNoDataMsg();
+        this.errorMsg = new ChartDatasourcePrometheusPluginErrorMsg();
+        this.findInLabelMap = null;
+        this.findInBorderColorMap = null;
+        this.findInBackgroundColorMap = null;
+        this.dataSetHook = null;
+    }
     /**
      * Compute a step for range_query (interval between 2 points in second)
      */
-    assertPluginOptions: (options) => {
-        if (!options)
-            throw 'ChartDatasourcePrometheusPlugin.options is undefined';
-
-        if (!options['query'])
+    assertPluginOptions() {
+        if (!this.query)
             throw new Error('options.query is undefined');
-        if (!options['timeRange'])
+        if (!this.timeRange)
             throw new Error('options.timeRange is undefined');
-        if (options['timeRange']['start'] == null)
+        if (this.timeRange.start == null)
             throw new Error('options.timeRange.start is undefined');
-        if (options['timeRange']['end'] == null)
+        if (this.timeRange.end == null)
             throw new Error('options.timeRange.end is undefined');
-
-        if (typeof (options['query']) != 'string' && !(typeof (options['query']) == 'object' && options['query'].constructor.name == 'Array'))
+        if (typeof (this.query) != 'string' && !(typeof (this.query) == 'object' && this.query.constructor.name == 'Array'))
             throw new Error('options.query must be a string or an array of strings');
-        if (typeof (options['query']) == 'object' && options['query'].constructor.name == 'Array' && (options['query'].length == 0 || options['query'].length > 10))
+        if (typeof (this.query) == 'object' && this.query.constructor.name == 'Array' && (this.query.length == 0 || this.query.length > 10))
             throw new Error('options.query must contains between 1 and 10 queries');
-
-        if (typeof (options['timeRange']) != 'object')
+        if (typeof (this.timeRange) != 'object')
             throw new Error('options.timeRange must be a object');
-        if (typeof (options['timeRange']['type']) != 'string')
+        if (typeof (this.timeRange.type) != 'string')
             throw new Error('options.timeRange.type must be a string');
-        if (!(typeof (options['timeRange']['start']) == 'number' || (typeof (options['timeRange']['start']) == 'object' && options['timeRange']['start'].constructor.name == 'Date')))
+        if (this.timeRange.type != 'relative' && this.timeRange.type != 'absolute')
+            throw new Error('options.timeRange.type must be either "relative" or "absolute"');
+        if (!(typeof (this.timeRange.start) == 'number' || (typeof (this.timeRange.start) == 'object' && this.timeRange.start.constructor.name == 'Date')))
             throw new Error('options.timeRange.start must be a Date object (absolute) or integer (relative)');
-        if (!(typeof (options['timeRange']['end']) == 'number' || (typeof (options['timeRange']['end']) == 'object' && options['timeRange']['end'].constructor.name == 'Date')))
+        if (!(typeof (this.timeRange.end) == 'number' || (typeof (this.timeRange.end) == 'object' && this.timeRange.end.constructor.name == 'Date')))
             throw new Error('options.timeRange.end must be a Date object (absolute) or integer (relative)');
-        if (options['timeRange']['msUpdateInterval'] != null && typeof (options['timeRange']['msUpdateInterval']) != 'number')
+        if (this.timeRange['msUpdateInterval'] != null && typeof (this.timeRange['msUpdateInterval']) != 'number')
             throw new Error('options.timeRange.msUpdateInterval must be a integer');
-        if (options['timeRange']['msUpdateInterval'] != null && options['timeRange']['msUpdateInterval'] < 1000)
+        if (this.timeRange['msUpdateInterval'] != null && this.timeRange['msUpdateInterval'] < 1000)
             throw new Error('options.timeRange.msUpdateInterval must be greater than 1s.');
-    },
-
-    defaultOptionsValues: (options) => {
-        const dEfault = {
-            // https://learnui.design/tools/data-color-picker.html#palette
-            'backgroundColor': [
-                'transparent',
-                'transparent',
-                'transparent',
-                'transparent',
-                'transparent',
-                'transparent',
-                'transparent',
-                'transparent',
-
-                // 'rgba(0, 63, 92, 0.2)',
-                // 'rgba(47, 75, 124, 0.2)',
-                // 'rgba(102, 81, 145, 0.2)',
-                // 'rgba(160, 81, 149, 0.2)',
-                // 'rgba(212, 80, 135, 0.2)',
-                // 'rgba(249, 93, 106, 0.2)',
-                // 'rgba(255, 124, 67, 0.2)',
-                // 'rgba(255, 166, 0, 0.2)',
-
-                // 'rgba(255, 99, 132, 0.2)',
-                // 'rgba(54, 162, 235, 0.2)',
-                // 'rgba(255, 206, 86, 0.2)',
-                // 'rgba(75, 192, 192, 0.2)',
-                // 'rgba(153, 102, 255, 0.2)',
-                // 'rgba(255, 159, 64, 0.2)'
-            ],
-            'borderColor': [
-                // 'rgba(0, 63, 92, 1)',
-                // 'rgba(47, 75, 124, 1)',
-                // 'rgba(102, 81, 145, 1)',
-                // 'rgba(160, 81, 149, 1)',
-                // 'rgba(212, 80, 135, 1)',
-                // 'rgba(249, 93, 106, 1)',
-                // 'rgba(255, 124, 67, 1)',
-                // 'rgba(255, 166, 0, 1)',
-
-                'rgba(255, 99, 132, 1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)'
-            ],
-            'borderWidth': 3,
-            'fillGaps': false,
-            'dataSetHook': null,
-        };
-
-        return Object.assign({}, dEfault, options);
-    },
-
-    getQueries: (options)=> {
-        if (typeof (options['query']) == 'string')
-            return [options['query']];
-        return options['query'];
     }
-
-};
+    getQueries() {
+        if (typeof (this.query) == 'string')
+            return [this.query];
+        return this.query;
+    }
+}
 
 // enforce xAxes data type to 'time'
-const setTimeAxesOptions = (chart, start, end) => {
-    chart.config.options = !!chart.config.options ? chart.config.options : {};
+function setTimeAxesOptions(chart) {
     chart.config.options.scales = !!chart.config.options.scales ? chart.config.options.scales : {};
     chart.config.options.scales.xAxes = !!chart.config.options.scales.xAxes && chart.config.options.scales.xAxes.length > 0 ? chart.config.options.scales.xAxes : [{}];
     chart.config.options.scales.xAxes[0].time = !!chart.config.options.scales.xAxes[0].time ? chart.config.options.scales.xAxes[0].time : {};
-    chart.config.options.scales.xAxes[0].time.displayFormats = !!chart.config.options.scales.xAxes[0].time.displayFormats ? chart.config.options.scales.xAxes[0].time.displayFormats : 'MMM D, hA'; // override default momentjs format for 'hour' time unit
-
+    // https://www.chartjs.org/docs/latest/axes/cartesian/time.html#display-formats
+    // chart.config.options.scales.xAxes[0].time.displayFormats = !!chart.config.options.scales.xAxes[0].time['displayFormats'] ? chart.config.options.scales.xAxes[0].time.displayFormats : 'MMM D, hA'; // override default momentjs format for 'hour' time unit
     chart.config.options.scales.xAxes[0].type = 'time';
     chart.config.options.scales.xAxes[0].distribution = chart.config.options.scales.xAxes[0].distribution || 'linear';
     chart.config.options.scales.xAxes[0].time.minUnit = chart.config.options.scales.xAxes[0].time.minUnit || 'second';
-};
-
+}
 // fill NaN values into data from Prometheus to fill Gaps (hole in chart is to show missing metrics from Prometheus)
-const fillGaps = (chart, start, end, step, options = {}) => {
-    const minStep = (options['timeRange']['minStep'] || step);
-    minStep = minStep >= step ? minStep : step; 
+// only accept Date objects here
+function fillGaps(chart, start, end, step, options) {
+    let minStep = options.timeRange.minStep || step;
+    minStep = minStep >= step ? minStep : step;
     chart.data.datasets.forEach((dataSet, index) => {
         // detect missing data in response
-        for (let i = dataSet.data.length - 2; i > 0 ; i--) {
-            if ((dataSet.data[i + 1].t - dataSet.data[i].t) > (1100 * minStep)) {
-                for (let steps = (dataSet.data[i + 1].t - dataSet.data[i].t) / (minStep * 1000); steps > 1; steps--) {
-                    dataSet.data.splice(i + 1, 0,
-                        { t: new Date(dataSet.data[i + 1].t.getTime() - minStep * 1000), v: Number.NaN });	
+        for (let i = dataSet.data.length - 2; i > 0; i--) {
+            if ((dataSet.data[i + 1]['t'] - dataSet.data[i]['t']) > (1100 * minStep)) {
+                for (let steps = (dataSet.data[i + 1]['t'] - dataSet.data[i]['t']) / (minStep * 1000); steps > 1; steps--) {
+                    const value = { t: new Date(dataSet.data[i + 1]['t'].getTime() - minStep * 1000), v: Number.NaN };
+                    dataSet.data.splice(i + 1, 0, value);
                 }
             }
         }
-
         // at the start of time range
-        if (Math.abs(start - dataSet.data[0].t) > (1100 * minStep)) {
-            for (let i = Math.abs(start - dataSet.data[0].t) / (minStep * 1000); i > 1; i--) {
-                chart.data.datasets[index].data.unshift({ t: new Date(dataSet.data[0].t.getTime() - minStep * 1000), v: Number.NaN });
+        if (Math.abs(start.getTime() - dataSet.data[0]['t']) > (1100 * minStep)) {
+            for (let i = Math.abs(start.getTime() - dataSet.data[0]['t']) / (minStep * 1000); i > 1; i--) {
+                chart.data.datasets[index].data.unshift({ t: new Date(dataSet.data[0]['t'].getTime() - minStep * 1000), v: Number.NaN });
             }
         }
-
         // at the end of time range
-        if (Math.abs(end - dataSet.data[dataSet.data.length - 1].t) > (1100 * minStep)) {
-            for (let i = Math.abs(end - dataSet.data[dataSet.data.length - 1].t) / (minStep * 1000); i > 1; i--) {
-                chart.data.datasets[index].data.push({ t: new Date(dataSet.data[chart.data.datasets[index].data.length - 1].t.getTime() + minStep * 1000), v: Number.NaN });
+        if (Math.abs(end.getTime() - dataSet.data[dataSet.data.length - 1]['t']) > (1100 * minStep)) {
+            for (let i = Math.abs(end.getTime() - dataSet.data[dataSet.data.length - 1]['t']) / (minStep * 1000); i > 1; i--) {
+                chart.data.datasets[index].data.push({ t: new Date(dataSet.data[chart.data.datasets[index].data.length - 1]['t'].getTime() + minStep * 1000), v: Number.NaN });
             }
         }
     });
-};
+}
 
-const selectLabel = (_options, serie, i) => {
-    if (_options.findInLabelMap) {
-        return _options.findInLabelMap(serie.metric) || serie.metric.toString();
+function selectLabel(options, serie, i) {
+    const defaultValue = serie.metric.toString();
+    if (options.findInLabelMap) {
+        return options.findInLabelMap(serie.metric) || defaultValue;
     }
-    return serie.metric.toString();
-};
-
-const selectBackGroundColor = (_options, serie, i) => {
-    if (_options.findInBackgroundColorMap) {
-        return _options.findInBackgroundColorMap(serie.metric) || _options.backgroundColor[i % _options.backgroundColor.length];
+    return defaultValue;
+}
+function selectBackGroundColor(options, serie, i) {
+    const defaultValue = options.backgroundColor[i % options.backgroundColor.length];
+    if (options.findInBackgroundColorMap) {
+        return options.findInBackgroundColorMap(serie.metric) || defaultValue;
     }
-    return _options.backgroundColor[i % _options.backgroundColor.length];
-};
-
-const selectBorderColor = (_options, serie, i) => {
-    if (_options.findInBorderColorMap) {
-        return _options.findInBorderColorMap(serie.metric) || _options.borderColor[i % _options.borderColor.length];
+    return defaultValue;
+}
+function selectBorderColor(options, serie, i) {
+    const defaultValue = options.borderColor[i % options.borderColor.length];
+    if (options.findInBorderColorMap) {
+        return options.findInBorderColorMap(serie.metric) || defaultValue;
     }
-    return _options.borderColor[i % _options.borderColor.length];
-};
+    return defaultValue;
+}
 
-var ChartDatasourcePrometheusPlugin = {
-    id: 'datasource-prometheus',
-
-    beforeInit: (chart) => {
-        chart['datasource-prometheus'] = {
-            'loading': false,
-        };
-    },
-
-    afterInit: (chart, options) => {
-        opt.assertPluginOptions(options); // triggers exceptions
-
+class ChartDatasourcePrometheusPluginInternals {
+    constructor() {
+        this.loading = false;
+        this.updateInterval = null;
+        this.error = null;
+    }
+}
+class ChartDatasourcePrometheusPlugin {
+    constructor() {
+        this.id = 'datasource-prometheus';
+    }
+    beforeInit(chart, options) {
+        chart['datasource-prometheus'] = new ChartDatasourcePrometheusPluginInternals();
+    }
+    afterInit(chart, _options) {
+        if (chart.config.type != 'line')
+            throw 'ChartDatasourcePrometheusPlugin is already compatible with Line chart\nFeel free to contribute for more!';
+        if (!_options)
+            throw 'ChartDatasourcePrometheusPlugin.options is undefined';
+        const options = Object.assign(new ChartDatasourcePrometheusPluginOptions(), _options);
+        options.assertPluginOptions(); // triggers exceptions
         // auto update
-        if (!!options && !!options['timeRange']) {
-            if (!!options['timeRange']['msUpdateInterval'])
-                chart['datasource-prometheus']['updateInterval'] = setInterval(() => {
+        if (!!options && !!options.timeRange) {
+            if (!!options.timeRange.msUpdateInterval)
+                chart['datasource-prometheus'].updateInterval = setInterval(() => {
                     chart.update();
-                }, options['timeRange']['msUpdateInterval']);
+                }, options.timeRange.msUpdateInterval);
             else
                 chart.update();
         }
-    },
-
-    beforeUpdate: (chart, options) => {
-        const _options = opt.defaultOptionsValues(options);
-
-        if (!!chart['datasource-prometheus'] && chart['datasource-prometheus']['loading'] == true)
-            return true;
-
-        const prometheus = _options['prometheus'];
-        const queries = opt.getQueries(_options);
-        const { start, end } = datasource.getStartAndEndDates(_options['timeRange']);
-        const expectedStep = _options['timeRange']['step'] || datasource.getPrometheusStepAuto(start, end, chart.width);
-        const minStep = (_options['timeRange']['minStep'] || expectedStep);
+    }
+    beforeUpdate(chart, _options) {
+        if (!!chart['datasource-prometheus'] && chart['datasource-prometheus'].loading == true)
+            return;
+        const options = Object.assign(new ChartDatasourcePrometheusPluginOptions(), _options);
+        const prometheus = options.prometheus;
+        const queries = options.getQueries();
+        const { start, end } = datasource.getStartAndEndDates(options.timeRange);
+        const expectedStep = options.timeRange.step || datasource.getPrometheusStepAuto(start, end, chart.width);
+        const minStep = (options.timeRange.minStep || expectedStep);
         const step = minStep >= expectedStep ? minStep : expectedStep;
-        if (!!chart['datasource-prometheus'] && 
-        chart['datasource-prometheus']['step'] == step &&
-        chart['datasource-prometheus']['start'] == start &&
-        chart['datasource-prometheus']['end'] == end)
-            return true;
-
-        chart['datasource-prometheus']['step'] = step;
-        chart['datasource-prometheus']['start'] = start;
-        chart['datasource-prometheus']['end'] = end;
-
-        chart['datasource-prometheus']['error'] = null;
-
-        const pq = new PrometheusQuery(prometheus);
-
+        if (!!chart['datasource-prometheus'] &&
+            chart['datasource-prometheus'].step == step &&
+            chart['datasource-prometheus'].start == start &&
+            chart['datasource-prometheus'].end == end)
+            return;
+        chart['datasource-prometheus'].step = step;
+        chart['datasource-prometheus'].start = start;
+        chart['datasource-prometheus'].end = end;
+        chart['datasource-prometheus'].error = null;
+        const p = new prometheusQuery.PrometheusDriver(prometheus);
         const reqs = queries.map((query) => {
-            return pq.rangeQuery(query, start, end, step);
+            return p.rangeQuery(query, start, end, step);
         });
-
         // look for previously hidden series
         let isHiddenMap = {};
         if (chart.data.datasets.length > 0) {
-            for (let oldDataSetKey in chart.data.datasets) {
-                const oldDataSet = chart.data.datasets[oldDataSetKey];
+            for (let oldDataSetIndex in chart.data.datasets) {
+                const oldDataSet = chart.data.datasets[oldDataSetIndex];
                 let metaIndex = 0;
-                for (let id in oldDataSet._meta) { metaIndex = id; }
-                isHiddenMap[oldDataSet.label] = !chart.isDatasetVisible(oldDataSet._meta[metaIndex].index);
+                for (let id in oldDataSet['_meta']) {
+                    metaIndex = id;
+                } // 🤮
+                isHiddenMap[oldDataSet.label] = !chart.isDatasetVisible(oldDataSet['_meta'][metaIndex].index);
             }
         }
-
         const yAxes = chart.config.options.scales.yAxes;
-
         // loop over queries
         // when we get all query results, we mix series into a single `datasets` array
         Promise.all(reqs)
             .then((results) => {
-                // extract data from responses and prepare series for Chart.js
-                const datasets = results.reduce((datasets, result, queryIndex) => {
-                    if (result.result.length == 0)
-                        return datasets;
-
-                    const seriesCount = datasets.length;
-                    const data = result.result.map((serie, i) => {
-                        return {
-                            yAxisID: !!yAxes && yAxes.length > 0 ? yAxes[queryIndex % yAxes.length].id : null,
-                            tension: _options.tension || 0.4,
-                            stepped: _options.stepped || false,
-                            cubicInterpolationMode: _options.cubicInterpolationMode || 'default',
-                            fill: _options.fill || false,
-                            label: selectLabel(_options, serie),
-                            data: serie.values.map((v, j) => {
-                                return {
-                                    t: v.time,
-                                    y: v.value,
-                                };
-                            }),
-                            backgroundColor: selectBackGroundColor(_options, serie, seriesCount + i),
-                            borderColor: selectBorderColor(_options, serie, seriesCount + i),
-                            borderWidth: _options.borderWidth,
-                            hidden: isHiddenMap[selectLabel(_options, serie)] || false,
-                        };
-                    });
-
-                    return datasets.concat(...data);
-                }, []);
-
-                chart.data.datasets = datasets;
-
-                // in case there is some data, we make things beautiful
-                if (chart.data.datasets.length > 0) {
-                    if (_options.fillGaps) {
-                        fillGaps(chart, start, end, step, _options);
-                    }
-
-                    if (_options.dataSetHook) {
-                        chart.data.datasets = _options.dataSetHook(chart.data.datasets);
-                    }
-
-                    setTimeAxesOptions(chart);
-
-                    chart['datasource-prometheus']['loading'] = true;
-                    chart.update();
-                    chart['datasource-prometheus']['loading'] = false;
+            // extract data from responses and prepare series for Chart.js
+            const datasets = results.reduce((datasets, result, queryIndex) => {
+                if (result.result.length == 0)
+                    return datasets;
+                const seriesCount = datasets.length;
+                const data = result.result.map((serie, i) => {
+                    return {
+                        yAxisID: !!yAxes && yAxes.length > 0 ? yAxes[queryIndex % yAxes.length].id : null,
+                        tension: options.tension,
+                        cubicInterpolationMode: options.cubicInterpolationMode || 'default',
+                        stepped: options.stepped,
+                        fill: options.fill || false,
+                        label: selectLabel(options, serie),
+                        data: serie.values.map((v, j) => {
+                            return {
+                                t: v.time,
+                                y: v.value,
+                            };
+                        }),
+                        backgroundColor: selectBackGroundColor(options, serie, seriesCount + i),
+                        borderColor: selectBorderColor(options, serie, seriesCount + i),
+                        borderWidth: options.borderWidth,
+                        hidden: isHiddenMap[selectLabel(options, serie)] || false,
+                    };
+                });
+                return datasets.concat(...data);
+            }, []);
+            chart.data.datasets = datasets;
+            // in case there is some data, we make things beautiful
+            if (chart.data.datasets.length > 0) {
+                if (options.fillGaps) {
+                    fillGaps(chart, start, end, step, options);
                 }
-            })
-            .catch((err) => {
-                // reset data and axes
-                chart.data.datasets = [];
+                if (options.dataSetHook) {
+                    chart.data.datasets = options.dataSetHook(chart.data.datasets);
+                }
                 setTimeAxesOptions(chart);
-
-                chart['datasource-prometheus']['error'] = 'Failed to fetch data';
-
-                throw err;
-            });
-
-        return true;
-    },
-    beforeRender: (chart, options) => {
-        const _options = opt.defaultOptionsValues(options);
-
-        if (chart['datasource-prometheus']['error'] != null) {
-            const ctx = chart.chart.ctx;
-            const width = chart.chart.width;
-            const height = chart.chart.height;
+                chart['datasource-prometheus'].loading = true;
+                chart.update();
+                chart['datasource-prometheus'].loading = false;
+            }
+        })
+            .catch((err) => {
+            // reset data and axes
+            chart.data.datasets = [];
+            setTimeAxesOptions(chart);
+            chart['datasource-prometheus'].error = 'Failed to fetch data';
+            throw err;
+        });
+    }
+    beforeRender(chart, _options) {
+        var _a;
+        const options = Object.assign(new ChartDatasourcePrometheusPluginOptions(), _options);
+        if (chart['datasource-prometheus'].error != null) {
+            const ctx = chart.ctx;
+            const width = chart.width;
+            const height = chart.height;
             chart.clear();
-    
             ctx.save();
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
+            ctx.direction = options.errorMsg.direction;
+            ctx.textAlign = options.errorMsg.textAlign;
+            ctx.textBaseline = options.errorMsg.textBaseline;
             ctx.font = "16px normal 'Helvetica Nueue'";
-            ctx.fillText(chart['datasource-prometheus']['error'], width / 2, height / 2);
+            ctx.fillText(((_a = options.errorMsg) === null || _a === void 0 ? void 0 : _a.message) || chart['datasource-prometheus'].error, width / 2, height / 2);
             ctx.restore();
-            return false;
-        } else if (chart.data.datasets.length == 0) {
-            const ctx = chart.chart.ctx;
-            const width = chart.chart.width;
-            const height = chart.chart.height;
-            chart.clear();
-    
-            ctx.save();
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.font = _options.noData && _options.noData.font ? _options.noData.font : "16px normal 'Helvetica Nueue'";
-            ctx.fillText(_options.noData && _options.noData.message ? _options.noData.message : 'No data to display', width / 2, height / 2);
-            ctx.restore();
-            return false;
+            return;
         }
-        return true
-    },
-
-    destroy: (chart, options) => {
+        else if (chart.data.datasets.length == 0) {
+            const ctx = chart.ctx;
+            const width = chart.width;
+            const height = chart.height;
+            chart.clear();
+            ctx.save();
+            ctx.direction = options.noDataMsg.direction;
+            ctx.textAlign = options.noDataMsg.textAlign;
+            ctx.textBaseline = options.noDataMsg.textBaseline;
+            ctx.font = options.noDataMsg.font;
+            ctx.fillText(options.noDataMsg.message, width / 2, height / 2);
+            ctx.restore();
+            return;
+        }
+    }
+    destroy(chart) {
         // auto update
-        if (!!chart['datasource-prometheus']['updateInterval'])
-            clearInterval(chart['datasource-prometheus']['updateInterval']);
-    },
+        if (!!chart['datasource-prometheus'].updateInterval)
+            clearInterval(chart['datasource-prometheus'].updateInterval);
+    }
+}
 
-    constructors: {},
-    extensions: {},
+var index = new ChartDatasourcePrometheusPlugin();
 
-    register: (type, constructor, extensions) => {},
-
-    getType: (url) => {},
-
-    getConstructor: (type) => {}
-};
-
-module.exports = ChartDatasourcePrometheusPlugin;
+exports.ChartDatasourcePrometheusPluginErrorMsg = ChartDatasourcePrometheusPluginErrorMsg;
+exports.ChartDatasourcePrometheusPluginNoDataMsg = ChartDatasourcePrometheusPluginNoDataMsg;
+exports.ChartDatasourcePrometheusPluginOptions = ChartDatasourcePrometheusPluginOptions;
+exports.PrometheusTimeRange = PrometheusTimeRange;
+exports.default = index;
+//# sourceMappingURL=chartjs-plugin-datasource-prometheus.cjs.js.map

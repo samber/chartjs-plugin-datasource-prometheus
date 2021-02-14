@@ -12,7 +12,7 @@
 
 - requires [chart.js](https://www.chartjs.org) 2.7 or later.
 - requires [moment.js](https://momentjs.com/) 2.0 or later.
-- requires [prometheus-query](https://github.com/samber/prometheus-query-js) 2.0 or later.
+- requires [prometheus-query](https://github.com/samber/prometheus-query-js) 3.0 or later.
 
 #### Demonstration:
 
@@ -121,25 +121,32 @@ var myChart = new Chart(ctx, {
 | **timeRange.end** | yes | Time range end: Date object (absolute) or integer (relative) |  |
 | **timeRange.step** | no | Time between 2 data points | [computed] |
 | **timeRange.minStep** | no | Min time between 2 data points | `null` |
-| **timeRange.msUpdateInterval** | no | Update interval in millisecond | `1000` |
-| **noData.message** | no | Empty chart message | "No data to display" |
-| **noData.font** | no | Font of empty chart message | `"16px normal 'Helvetica Nueue'"` |
+| **timeRange.msUpdateInterval** | no | Update interval in millisecond | null |
 | **fillGaps** | no | Insert NaN values when values are missing in time range | `false` |
 | **tension** | no | Bezier curve tension of the line. Set to 0 to draw straightlines. This option is ignored if monotone cubic interpolation is used | `0.4` |
 | **cubicInterpolationMode** | no | "default" or "monotone" | `"default"` |
 | **stepped** | no | false, true, "before", "middle" or "after" | `false` |
 | **fill** | no | Fills the area under the line | `false` |
 | **borderWidth** | no | Should I explain this field? | `3` |
-| **borderColor** | no | Should I explain this field? | `"rgba(0, 0, 0, 0.1)"` |
+| **backgroundColor** | no | Should I explain this field? | See library source code |
+| **borderColor** | no | Should I explain this field? | See library source code |
+| **errorMsg.message** | no | Overrides error messages | `null` |
+| **errorMsg.font** | no | Font of error messages | `"16px normal 'Helvetica Nueue'"` |
+| **noDataMsg.message** | no | Empty chart message | `"No data to display"` |
+| **noDataMsg.font** | no | Font of empty chart message | `"16px normal 'Helvetica Nueue'"` |
 
 ### Hooks
 
+Some hooks have been inserted into the library. It may help you to rewrite label names dynamically, set colors...
+
+// 💡  For better serie labels, we are looking for a templating solution => please contribute ;)
+
 | Property | Required | Description | Prototype |
 | --- | :---: | --- | --- |
-| **findInLabelMap** | no | Custom serie label | ? |
-| **findInBorderColorMap** | no | Custom serie line color | ? |
-| **findInBackgroundColorMap** | no | Custom serie background color | ? |
-| **dataSetHook** | no | Modify data on the fly, right before display | `datasets: object[] => object[]` |
+| **findInLabelMap** | no | Custom serie label | `(serie: Metric) => string | null` |
+| **findInBorderColorMap** | no | Custom serie line color | `(serie: Metric) => string | null` |
+| **findInBackgroundColorMap** | no | Custom serie background color | `(serie: Metric) => string | null` |
+| **dataSetHook** | no | Modify data on the fly, right before display | `(datasetes: ChartDataSet[]) => ChartDataSet[]` |
 
 ## Examples
 

@@ -46,7 +46,8 @@ function getEndpoint() {
     // then we need this bullshit to prevent requests to insecure endpoint
     // https://github.com/RobustPerception/demo_prometheus_ansible/issues/5
     if (endpointInput.value == 'http://demo.robustperception.io:9090/')
-        return 'https://cors-anywhere.herokuapp.com/' + endpointInput.value;
+        return 'https://cors-anywhere-chartjs-demo.herokuapp.com/' + endpointInput.value;
+        // return 'https://cors-anywhere.herokuapp.com/' + endpointInput.value;
     return endpointInput.value;
 }
 
