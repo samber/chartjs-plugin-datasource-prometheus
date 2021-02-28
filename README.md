@@ -12,7 +12,7 @@
 
 - requires [chart.js](https://www.chartjs.org) 2.7 or later.
 - requires [moment.js](https://momentjs.com/) 2.0 or later.
-- requires [prometheus-query](https://github.com/samber/prometheus-query-js) 2.0 or later.
+- requires [prometheus-query](https://github.com/samber/prometheus-query-js) 3.0 or later.
 
 #### Demonstration:
 
@@ -26,9 +26,10 @@
 - Supports **line chart only** (for now!)
 - Graph **auto-refresh**
 - Date interval can be **absolute** or **relative** to `now`
+- Multiple Prometheus queries into the same chart
+- Custom backend requests (useful for multitenant apps)
 - Hooks available (styling, labeling, data presentation...)
-- Empty chart message
-- Error message on Prometheus http request failure
+- Custom chart messages for errors or empty Prometheus responses
 - Break or continuous lines when gap in data
 - Line styling
 
@@ -115,31 +116,45 @@ var myChart = new Chart(ctx, {
 | --- | :---: | --- | --- |
 | **prometheus.endpoint** | yes | Prometheus hostname | |
 | **prometheus.baseURL** | no | Prometheus metric path | `"/api/v1"` |
-| **query** | yes | Prometheus query: string or string[] |  |
+| **prometheus.headers** | no | Headers to add to Prometheus request | |
+| **prometheus.auth.username** | no | Basic auth username | |
+| **prometheus.auth.password** | no | Basic auth password | |
+| **prometheus.proxy.host** | no | Proxy hostname | |
+| **prometheus.proxy.port** | no | Proxy port | |
+| **prometheus.withCredentials** | no | Send cookies in cross-site requests | `false` |
+| **prometheus.timeout** | no | Prometheus request timeout in milliseconds | `10000` |
+| **query** | yes | Prometheus query: string or function (see below). Supports multiple queries, using an array. |  |
 | **timeRange.type** | no | Time range type: absolute or relative | `"absolute"` |
 | **timeRange.start** | yes | Time range start: Date object (absolute) or integer (relative) |  |
 | **timeRange.end** | yes | Time range end: Date object (absolute) or integer (relative) |  |
 | **timeRange.step** | no | Time between 2 data points | [computed] |
 | **timeRange.minStep** | no | Min time between 2 data points | `null` |
-| **timeRange.msUpdateInterval** | no | Update interval in millisecond | `1000` |
-| **noData.message** | no | Empty chart message | "No data to display" |
-| **noData.font** | no | Font of empty chart message | `"16px normal 'Helvetica Nueue'"` |
+| **timeRange.msUpdateInterval** | no | Update interval in millisecond | null |
 | **fillGaps** | no | Insert NaN values when values are missing in time range | `false` |
 | **tension** | no | Bezier curve tension of the line. Set to 0 to draw straightlines. This option is ignored if monotone cubic interpolation is used | `0.4` |
 | **cubicInterpolationMode** | no | "default" or "monotone" | `"default"` |
 | **stepped** | no | false, true, "before", "middle" or "after" | `false` |
 | **fill** | no | Fills the area under the line | `false` |
 | **borderWidth** | no | Should I explain this field? | `3` |
-| **borderColor** | no | Should I explain this field? | `"rgba(0, 0, 0, 0.1)"` |
+| **backgroundColor** | no | Should I explain this field? | See library source code |
+| **borderColor** | no | Should I explain this field? | See library source code |
+| **errorMsg.message** | no | Overrides error messages | `null` |
+| **errorMsg.font** | no | Font of error messages | `"16px normal 'Helvetica Nueue'"` |
+| **noDataMsg.message** | no | Empty chart message | `"No data to display"` |
+| **noDataMsg.font** | no | Font of empty chart message | `"16px normal 'Helvetica Nueue'"` |
 
 ### Hooks
 
+Some hooks have been inserted into the library. It may help you to rewrite label names dynamically, set colors...
+
+// 💡  For better serie labels, we are looking for a templating solution => please contribute ;)
+
 | Property | Required | Description | Prototype |
 | --- | :---: | --- | --- |
-| **findInLabelMap** | no | Custom serie label | ? |
-| **findInBorderColorMap** | no | Custom serie line color | ? |
-| **findInBackgroundColorMap** | no | Custom serie background color | ? |
-| **dataSetHook** | no | Modify data on the fly, right before display | `datasets: object[] => object[]` |
+| **findInLabelMap** | no | Custom serie label | `(serie: Metric) => string | null` |
+| **findInBorderColorMap** | no | Custom serie line color | `(serie: Metric) => string | null` |
+| **findInBackgroundColorMap** | no | Custom serie background color | `(serie: Metric) => string | null` |
+| **dataSetHook** | no | Modify data on the fly, right before display | `(datasetes: ChartDataSet[]) => ChartDataSet[]` |
 
 ## Examples
 
@@ -182,6 +197,48 @@ var myChart = new Chart(ctx, {
 
 ![screenshot](./doc/img/screenshot-multiple-queries.png)
 
+### Custom queries
+
+In the context of a multitenant application, it is not a good idea to write a query on the browser side. In that scenario, you may need to send a custom request to your backend, which is responsible for doing the final Prometheus query.
+
+In that case, the `prometheus` field can be ommited. Just pass a function with the following prototype: `(start: Date, end: Date, step: number) => Promise<any>`.
+
+It can be combined with traditional string queries: `query: ['node_load1', customReq]`.
+
+```js
+// Here, we call a fictive API that gonna query Prometheus to get the list
+// of comments, wrote by the current user during the past hour.
+// This endpoint will return a Prometheus-like response.
+function customReq(start, end, step) {
+    const startTimestamp = start.getTime() / 1000;
+    const endTimestamp = end.getTime() / 1000;
+
+    const url = `https://api.example.com/user/activity?event_type=comment.write&range_start=${startTimestamp}&end=${endTimestamp}&range_step=${step}`;
+    const headers = {'Authorization': 'Bearer Ainae1Ahchiew6UhseeCh7el'};
+
+    return fetch(url, { headers })
+        .then(response => response.json())
+        .then(response => response['data']);
+}
+
+const myChart = new Chart(ctx, {
+    type: 'line',
+    plugins: [ChartDatasourcePrometheusPlugin],
+    options: {
+        plugins: {
+            'datasource-prometheus': {
+                query: customReq,
+                timeRange: {
+                    type: 'relative',
+                    start: -1 * 60 * 60 * 1000, // 1h ago
+                    end: 0,   // now
+                },
+            },
+        },
+    },
+});
+```
+
 ## 🤯 Troubleshooting
 
 #### CORS
@@ -191,6 +248,8 @@ Start your Prometheus instance with `--web.cors.origin="www.example.com"` flag o
 ## 🔐 Security advisory
 
 Please read the [security advisory](https://github.com/samber/prometheus-query-js#-security-advisory) of prometheus-query library.
+
+In the context of a multitenant application, it is not a good idea to write a query on the browser side. In that scenario, you may need to use the "custom request" feature.
 
 ## 🤝 Contributing
 
