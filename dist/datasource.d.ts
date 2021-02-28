@@ -1,4 +1,5 @@
-import { ChartDatasourcePrometheusPluginOptionsTimeRange, PrometheusTimeRangeAbsolute } from "./options";
+import { PrometheusConnectionOptions, QueryResult } from "prometheus-query";
+import { ChartDatasourcePrometheusPluginOptionsTimeRange, PrometheusQuery, PrometheusTimeRangeAbsolute } from "./options";
 declare const _default: {
     /**
      * Compute a step for range_query (interval between 2 points in second)
@@ -15,5 +16,6 @@ declare const _default: {
      * @param {object} timeRange
      */
     getStartAndEndDates(timeRange: ChartDatasourcePrometheusPluginOptionsTimeRange): PrometheusTimeRangeAbsolute;
+    executeQueries: (prometheus: PrometheusConnectionOptions, queries: PrometheusQuery[], start: Date, end: Date, step: number) => Promise<QueryResult>[];
 };
 export default _default;

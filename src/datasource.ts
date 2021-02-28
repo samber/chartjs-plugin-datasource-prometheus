@@ -1,4 +1,5 @@
-import { ChartDatasourcePrometheusPluginOptionsTimeRange, PrometheusTimeRangeAbsolute } from "./options";
+import { PrometheusConnectionOptions, PrometheusDriver, QueryResult } from "prometheus-query";
+import { ChartDatasourcePrometheusPluginOptionsTimeRange, PrometheusQuery, PrometheusTimeRangeAbsolute } from "./options";
 
 // Min step is 1s
 const PROMETHEUS_QUERY_RANGE_MIN_STEP = 1;
@@ -42,6 +43,20 @@ export default {
             };
         }
         throw new Error('Unexpected options.timeRange value.');
+    },
+
+    executeQueries: (prometheus: PrometheusConnectionOptions, queries: PrometheusQuery[], start: Date, end: Date, step: number): Promise<QueryResult>[] => {
+        const haveDirectPrometheusRequests: boolean = queries.find((q: PrometheusQuery) => typeof q === 'string') != null;
+        const p: PrometheusDriver = !!prometheus && haveDirectPrometheusRequests ? new PrometheusDriver(prometheus) : null;
+
+        return queries.map((query: PrometheusQuery) => {
+            if (typeof query === 'string')
+                return p.rangeQuery(query, start, end, step);
+
+            // if query is not a string, i assume this is an async function returning prometheus results
+            return query(start, end, step)
+                .then((data: object) => QueryResult.fromJSON(data));
+        });
     }
 
 };

@@ -16,7 +16,8 @@ export interface PrometheusTimeRangeAbsolute {
     end: Date;
 }
 export declare type ChartDatasourcePrometheusPluginOptionsTimeRange = PrometheusTimeRange & (PrometheusTimeRangeRelative | PrometheusTimeRangeAbsolute);
-export declare type PrometheusQuery = string | string[];
+export declare type PrometheusQuery = string | ((start: Date, end: Date, step: number) => Promise<any>);
+export declare type PrometheusQueries = PrometheusQuery | PrometheusQuery[];
 export declare type PrometheusSerieHook = (serie: Metric) => string | null;
 export declare type DataSetHook = (datasets: ChartDataSets[]) => ChartDataSets[];
 export declare class ChartDatasourcePrometheusPluginNoDataMsg {
@@ -37,8 +38,8 @@ export declare class ChartDatasourcePrometheusPluginOptions {
     /**
      * Options for Prometheus requests
      */
-    prometheus: PrometheusConnectionOptions;
-    query: PrometheusQuery;
+    prometheus: PrometheusConnectionOptions | null;
+    query: PrometheusQueries;
     timeRange: ChartDatasourcePrometheusPluginOptionsTimeRange;
     /**
      * Options for designing Charts
@@ -62,5 +63,5 @@ export declare class ChartDatasourcePrometheusPluginOptions {
      * Compute a step for range_query (interval between 2 points in second)
      */
     assertPluginOptions(): void;
-    getQueries(): string[];
+    getQueries(): PrometheusQuery[];
 }

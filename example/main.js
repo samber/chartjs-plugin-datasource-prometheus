@@ -30,6 +30,7 @@ const myChart = new Chart(ctx, {
                 },
                 // query: ['node_load1', 'node_load5', 'node_load15'],
                 query: queryInput.value,
+                // query: customReq,
                 timeRange: {
                     type: 'relative',
                     start: start,
@@ -39,6 +40,15 @@ const myChart = new Chart(ctx, {
         },
     },
 });
+
+
+function customReq(start, end, step) {
+    const url = `http://demo.robustperception.io:9090/api/v1/query_range?query=${encodeURIComponent(queryInput.value)}&start=${start.getTime() / 1000}&end=${end.getTime() / 1000}&step=${step}`;
+    const proxiedUrl = `https://cors-anywhere-chartjs-demo.herokuapp.com/${url}`;
+    return fetch(proxiedUrl)
+        .then(response => response.json())
+        .then(response => response['data']);
+}
 
 function getEndpoint() {
     // demo.robustperception.io does not support HTTPS

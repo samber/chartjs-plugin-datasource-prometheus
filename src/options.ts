@@ -1,6 +1,6 @@
 
 import { ChartDataSets } from "chart.js";
-import { Metric, PrometheusConnectionOptions } from "prometheus-query";
+import { Metric, PrometheusConnectionOptions, QueryResult } from "prometheus-query";
 
 // Mixin for TimeRange field
 export class PrometheusTimeRange {
@@ -9,24 +9,23 @@ export class PrometheusTimeRange {
 
     msUpdateInterval?: number | null = null;
 };
-
 export interface PrometheusTimeRangeRelative {
     type: 'relative';
 
     start: number;
     end: number;
 }
-
 export interface PrometheusTimeRangeAbsolute {
     type: 'absolute';
 
     start: Date;
     end: Date;
 }
-
 export type ChartDatasourcePrometheusPluginOptionsTimeRange = PrometheusTimeRange & (PrometheusTimeRangeRelative | PrometheusTimeRangeAbsolute);
 
-export type PrometheusQuery = string | string[];
+export type PrometheusQuery = string | ((start: Date, end: Date, step: number) => Promise<any>);
+export type PrometheusQueries = PrometheusQuery | PrometheusQuery[];
+
 export type PrometheusSerieHook = (serie: Metric) => string | null;
 export type DataSetHook = (datasets: ChartDataSets[]) => ChartDataSets[];
 
@@ -50,8 +49,8 @@ export class ChartDatasourcePrometheusPluginOptions {
     /**
      * Options for Prometheus requests
      */
-    prometheus: PrometheusConnectionOptions;
-    query: PrometheusQuery;
+    prometheus: PrometheusConnectionOptions | null = null; // can be null when the provided query is just an async function
+    query: PrometheusQueries;   // @TODO: rename this field to "queries"
     timeRange: ChartDatasourcePrometheusPluginOptionsTimeRange;
 
     /**
@@ -129,10 +128,10 @@ export class ChartDatasourcePrometheusPluginOptions {
         if (this.timeRange.end == null)
             throw new Error('options.timeRange.end is undefined');
 
-        if (typeof (this.query) != 'string' && !(typeof (this.query) == 'object' && this.query.constructor.name == 'Array'))
-            throw new Error('options.query must be a string or an array of strings');
-        if (typeof (this.query) == 'object' && this.query.constructor.name == 'Array' && (this.query.length == 0 || this.query.length > 10))
-            throw new Error('options.query must contains between 1 and 10 queries');
+        // if (typeof (this.query) != 'string' && !(typeof (this.query) == 'object' && this.query.constructor.name == 'Array'))
+        //     throw new Error('options.query must be a string or an array of strings');
+        // if (typeof (this.query) == 'object' && this.query.constructor.name == 'Array' && (this.query.length == 0 || this.query.length > 10))
+        //     throw new Error('options.query must contains between 1 and 10 queries');
 
         if (typeof (this.timeRange) != 'object')
             throw new Error('options.timeRange must be a object');
@@ -150,10 +149,10 @@ export class ChartDatasourcePrometheusPluginOptions {
             throw new Error('options.timeRange.msUpdateInterval must be greater than 1s.');
     }
 
-    public getQueries(): string[] {
-        if (typeof (this.query) == 'string')
-            return [this.query];
-        return this.query;
+    public getQueries(): PrometheusQuery[] {
+        if (this.query?.constructor?.name != 'Array')
+            return [this.query] as PrometheusQuery[];
+        return this.query as PrometheusQuery[];
     }
 
 };

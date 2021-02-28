@@ -1,4 +1,4 @@
-import { PrometheusDriver } from 'prometheus-query';
+import { PrometheusDriver, QueryResult } from 'prometheus-query';
 
 // Min step is 1s
 const PROMETHEUS_QUERY_RANGE_MIN_STEP = 1;
@@ -39,17 +39,21 @@ var datasource = {
             };
         }
         throw new Error('Unexpected options.timeRange value.');
+    },
+    executeQueries: (prometheus, queries, start, end, step) => {
+        const haveDirectPrometheusRequests = queries.find((q) => typeof q === 'string') != null;
+        const p = !!prometheus && haveDirectPrometheusRequests ? new PrometheusDriver(prometheus) : null;
+        return queries.map((query) => {
+            if (typeof query === 'string')
+                return p.rangeQuery(query, start, end, step);
+            // if query is not a string, i assume this is an async function returning prometheus results
+            return query(start, end, step)
+                .then((data) => QueryResult.fromJSON(data));
+        });
     }
 };
 
 // Mixin for TimeRange field
-class PrometheusTimeRange {
-    constructor() {
-        this.step = null;
-        this.minStep = null;
-        this.msUpdateInterval = null;
-    }
-}
 class ChartDatasourcePrometheusPluginNoDataMsg {
     constructor() {
         this.message = 'No data to display';
@@ -70,6 +74,10 @@ class ChartDatasourcePrometheusPluginErrorMsg {
 }
 class ChartDatasourcePrometheusPluginOptions {
     constructor() {
+        /**
+         * Options for Prometheus requests
+         */
+        this.prometheus = null; // can be null when the provided query is just an async function
         /**
          * Options for designing Charts
          * See https://learnui.design/tools/data-color-picker.html#palette
@@ -125,10 +133,10 @@ class ChartDatasourcePrometheusPluginOptions {
             throw new Error('options.timeRange.start is undefined');
         if (this.timeRange.end == null)
             throw new Error('options.timeRange.end is undefined');
-        if (typeof (this.query) != 'string' && !(typeof (this.query) == 'object' && this.query.constructor.name == 'Array'))
-            throw new Error('options.query must be a string or an array of strings');
-        if (typeof (this.query) == 'object' && this.query.constructor.name == 'Array' && (this.query.length == 0 || this.query.length > 10))
-            throw new Error('options.query must contains between 1 and 10 queries');
+        // if (typeof (this.query) != 'string' && !(typeof (this.query) == 'object' && this.query.constructor.name == 'Array'))
+        //     throw new Error('options.query must be a string or an array of strings');
+        // if (typeof (this.query) == 'object' && this.query.constructor.name == 'Array' && (this.query.length == 0 || this.query.length > 10))
+        //     throw new Error('options.query must contains between 1 and 10 queries');
         if (typeof (this.timeRange) != 'object')
             throw new Error('options.timeRange must be a object');
         if (typeof (this.timeRange.type) != 'string')
@@ -145,7 +153,8 @@ class ChartDatasourcePrometheusPluginOptions {
             throw new Error('options.timeRange.msUpdateInterval must be greater than 1s.');
     }
     getQueries() {
-        if (typeof (this.query) == 'string')
+        var _a, _b;
+        if (((_b = (_a = this.query) === null || _a === void 0 ? void 0 : _a.constructor) === null || _b === void 0 ? void 0 : _b.name) != 'Array')
             return [this.query];
         return this.query;
     }
@@ -264,10 +273,7 @@ class ChartDatasourcePrometheusPlugin {
         chart['datasource-prometheus'].start = start;
         chart['datasource-prometheus'].end = end;
         chart['datasource-prometheus'].error = null;
-        const p = new PrometheusDriver(prometheus);
-        const reqs = queries.map((query) => {
-            return p.rangeQuery(query, start, end, step);
-        });
+        const reqs = datasource.executeQueries(prometheus, queries, start, end, step);
         // look for previously hidden series
         let isHiddenMap = {};
         if (chart.data.datasets.length > 0) {
@@ -375,7 +381,7 @@ class ChartDatasourcePrometheusPlugin {
 }
 
 var index = new ChartDatasourcePrometheusPlugin();
+// export * from './options';
 
 export default index;
-export { ChartDatasourcePrometheusPluginErrorMsg, ChartDatasourcePrometheusPluginNoDataMsg, ChartDatasourcePrometheusPluginOptions, PrometheusTimeRange };
 //# sourceMappingURL=chartjs-plugin-datasource-prometheus.esm.js.map
