@@ -32,6 +32,7 @@
 - Custom chart messages for errors or empty Prometheus responses
 - Break or continuous lines when gap in data
 - Line styling
+- Send queries with your own Prometheus driver
 
 ⚠️ This project is not intented to replace [Grafana](https://grafana.com/). For monitoring purpose or internal company graph showing, Grafana will definitely be better and more secure.
 
@@ -154,7 +155,7 @@ Some hooks have been inserted into the library. It may help you to rewrite label
 | **findInLabelMap** | no | Custom serie label | `(serie: Metric) => string | null` |
 | **findInBorderColorMap** | no | Custom serie line color | `(serie: Metric) => string | null` |
 | **findInBackgroundColorMap** | no | Custom serie background color | `(serie: Metric) => string | null` |
-| **dataSetHook** | no | Modify data on the fly, right before display | `(datasetes: ChartDataSet[]) => ChartDataSet[]` |
+| **dataSetHook** | no | Modify data on the fly, right before display | `(datasets: ChartDataSet[]) => ChartDataSet[]` |
 
 ## Examples
 
