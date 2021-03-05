@@ -9,7 +9,7 @@ npm run dev
 ```bash
 docker run --rm -it -p 8080:80 -v `pwd`:/usr/share/nginx/html nginx
 
-# Then open http://localhost:8080/examples/browser
+# Then open http://localhost:8080/example
 ```
 
 Open ./example/index.html

@@ -22,6 +22,9 @@ const myChart = new Chart(ctx, {
     type: 'line',
     plugins: [ChartDatasourcePrometheusPlugin],
     options: {
+        animation: {
+            duration: 0,
+        },
         scales: {},
         plugins: {
             'datasource-prometheus': {
@@ -35,6 +38,7 @@ const myChart = new Chart(ctx, {
                     type: 'relative',
                     start: start,
                     end: end,
+                    // msUpdateInterval: 2000,
                 },
             },
         },

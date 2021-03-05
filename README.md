@@ -188,7 +188,7 @@ var myChart = new Chart(ctx, {
 
                     // from 12 hours ago to now
                     start: -12 * 60 * 60 * 1000,
-                    end: end,
+                    end: 0,
                 },
             },
         },
@@ -197,6 +197,38 @@ var myChart = new Chart(ctx, {
 ```
 
 ![screenshot](./doc/img/screenshot-multiple-queries.png)
+
+### Auto refresh
+
+Animations should be disabled when chart refresh itself.
+
+```js
+var myChart = new Chart(ctx, {
+    type: 'line',
+    plugins: [ChartDatasourcePrometheusPlugin],
+    options: {
+        animation: {
+            duration: 0,
+        },
+        plugins: {
+            'datasource-prometheus': {
+                prometheus: {
+                    endpoint: "http://demo.robustperception.io:9090",
+                },
+                query: 'node_load1',
+                timeRange: {
+                    type: 'relative',
+
+                    // from 10 minutes ago to now
+                    start: -1 * 10 * 60 * 1000,
+                    end: 0,
+                    msUpdateInterval: 5000,
+                },
+            },
+        },
+    },
+});
+```
 
 ### Custom queries
 
