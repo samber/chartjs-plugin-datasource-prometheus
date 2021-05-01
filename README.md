@@ -154,9 +154,9 @@ Some hooks have been inserted into the library. It may help you to rewrite label
 
 | Property | Required | Description | Prototype |
 | --- | :---: | --- | --- |
-| **findInLabelMap** | no | Custom serie label | `(serie: Metric) => string | null` |
-| **findInBorderColorMap** | no | Custom serie line color | `(serie: Metric) => string | null` |
-| **findInBackgroundColorMap** | no | Custom serie background color | `(serie: Metric) => string | null` |
+| **findInLabelMap** | no | Custom serie label | `(serie: Metric) => string` |
+| **findInBorderColorMap** | no | Custom serie line color | `(serie: Metric) => string` |
+| **findInBackgroundColorMap** | no | Custom serie background color | `(serie: Metric) => string` |
 | **dataSetHook** | no | Modify data on the fly, right before display | `(datasets: ChartDataSet[]) => ChartDataSet[]` |
 
 ## Examples
