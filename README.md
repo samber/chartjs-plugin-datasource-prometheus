@@ -18,6 +18,8 @@
 
 [https://samber.github.io/chartjs-plugin-datasource-prometheus/example/](https://samber.github.io/chartjs-plugin-datasource-prometheus/example/)
 
+I would be happy to add links to charts using this library. Feel free to reach me by creating an issue ;)
+
 ## ✨ Features
 
 - Loads time-series from Prometheus into Chart.js.
