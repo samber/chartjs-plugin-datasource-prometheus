@@ -397,5 +397,5 @@ class ChartDatasourcePrometheusPlugin {
 var index = new ChartDatasourcePrometheusPlugin();
 // export * from './options';
 
-export default index;
+export { index as default };
 //# sourceMappingURL=chartjs-plugin-datasource-prometheus.esm.js.map
