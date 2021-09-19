@@ -1,11 +1,11 @@
 /*!
- * chartjs-plugin-datasource-prometheus v1.0.1
+ * chartjs-plugin-datasource-prometheus v1.0.2
  * github.com/samber/chartjs-plugin-datasource-prometheus
  * (c) 2021 chartjs-plugin-datasource-prometheus Contributors
  * Released under the MIT License
  */
 /*!
- * chartjs-plugin-datasource-prometheus v1.0.1
+ * chartjs-plugin-datasource-prometheus v1.0.2
  * github.com/samber/chartjs-plugin-datasource-prometheus
  * (c) 2021 chartjs-plugin-datasource-prometheus Contributors
  * Released under the MIT License
