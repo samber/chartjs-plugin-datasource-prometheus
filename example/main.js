@@ -4,7 +4,7 @@ const queryInput = document.querySelector('form#refresh-form input#query');
 const btn = document.querySelector('form#refresh-form button');
 const ctx = document.querySelector('#myChart canvas').getContext('2d');
 
-endpointInput.value = 'http://demo.robustperception.io:9090/';
+endpointInput.value = 'https://prometheus.demo.do.prometheus.io/';
 
 queryInput.value = 'sum by (job) (go_gc_duration_seconds)';
 // queryInput.value = 'go_memstats_heap_objects';
@@ -29,7 +29,7 @@ const myChart = new Chart(ctx, {
         plugins: {
             'datasource-prometheus': {
                 prometheus: {
-                    endpoint: getEndpoint(),
+                    endpoint: endpointInput.value,
                 },
                 // query: ['node_load1', 'node_load5', 'node_load15'],
                 query: queryInput.value,
@@ -47,27 +47,16 @@ const myChart = new Chart(ctx, {
 
 
 function customReq(start, end, step) {
-    const url = `http://demo.robustperception.io:9090/api/v1/query_range?query=${encodeURIComponent(queryInput.value)}&start=${start.getTime() / 1000}&end=${end.getTime() / 1000}&step=${step}`;
+    const url = `https://prometheus.demo.do.prometheus.io/api/v1/query_range?query=${encodeURIComponent(queryInput.value)}&start=${start.getTime() / 1000}&end=${end.getTime() / 1000}&step=${step}`;
     const proxiedUrl = `https://cors-anywhere-chartjs-demo.herokuapp.com/${url}`;
     return fetch(proxiedUrl)
         .then(response => response.json())
         .then(response => response['data']);
 }
 
-function getEndpoint() {
-    // demo.robustperception.io does not support HTTPS
-    // but Github Pages use HTTPS
-    // then we need this bullshit to prevent requests to insecure endpoint
-    // https://github.com/RobustPerception/demo_prometheus_ansible/issues/5
-    if (endpointInput.value == 'http://demo.robustperception.io:9090/')
-        return 'https://cors-anywhere-chartjs-demo.herokuapp.com/' + endpointInput.value;
-        // return 'https://cors-anywhere.herokuapp.com/' + endpointInput.value;
-    return endpointInput.value;
-}
-
 form.addEventListener('submit', (event) => {
     event.preventDefault();
-    myChart.options.plugins['datasource-prometheus'].prometheus.endpoint = getEndpoint();
+    myChart.options.plugins['datasource-prometheus'].prometheus.endpoint = endpointInput.value;
     myChart.options.plugins['datasource-prometheus'].query = queryInput.value;
     myChart.update();
 });

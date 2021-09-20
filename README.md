@@ -94,7 +94,7 @@ var myChart = new Chart(ctx, {
     plugins: {
       'datasource-prometheus': {
         prometheus: {
-          endpoint: "http://demo.robustperception.io:9090",
+          endpoint: "https://prometheus.demo.do.prometheus.io",
           baseURL: "/api/v1",   // default value
         },
         query: 'sum by (job) (go_gc_duration_seconds)',
@@ -182,7 +182,7 @@ var myChart = new Chart(ctx, {
         plugins: {
             'datasource-prometheus': {
                 prometheus: {
-                    endpoint: "http://demo.robustperception.io:9090",
+                    endpoint: "https://prometheus.demo.do.prometheus.io",
                 },
                 query: ['node_load1', 'node_load5', 'node_load15'],
                 timeRange: {
@@ -215,7 +215,7 @@ var myChart = new Chart(ctx, {
         plugins: {
             'datasource-prometheus': {
                 prometheus: {
-                    endpoint: "http://demo.robustperception.io:9090",
+                    endpoint: "https://prometheus.demo.do.prometheus.io",
                 },
                 query: 'node_load1',
                 timeRange: {
