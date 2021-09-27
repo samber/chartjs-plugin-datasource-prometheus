@@ -1,5 +1,5 @@
 
-import { ChartDataSets } from "chart.js";
+import { ChartDataset } from "chart.js";
 import { Metric, PrometheusConnectionOptions, QueryResult } from "prometheus-query";
 
 // Mixin for TimeRange field
@@ -27,7 +27,7 @@ export type PrometheusQuery = string | ((start: Date, end: Date, step: number) =
 export type PrometheusQueries = PrometheusQuery | PrometheusQuery[];
 
 export type PrometheusSerieHook = (serie: Metric) => string | null;
-export type DataSetHook = (datasets: ChartDataSets[]) => ChartDataSets[];
+export type DataSetHook = (datasets: ChartDataset[]) => ChartDataset[];
 
 export class ChartDatasourcePrometheusPluginNoDataMsg {
     message?: string = 'No data to display';

@@ -1,6 +1,6 @@
 
 import { PrometheusDriver, QueryResult } from 'prometheus-query';
-import { Chart, ChartDataSets, PluginServiceGlobalRegistration, PluginServiceRegistrationOptions } from 'chart.js';
+import { Chart, ChartDataset } from 'chart.js';
 
 import datasource from './datasource';
 import { ChartDatasourcePrometheusPluginOptions, PrometheusQuery } from './options';
@@ -20,18 +20,19 @@ class ChartDatasourcePrometheusPluginInternals {
     error: string | null = null;
 }
 
-export class ChartDatasourcePrometheusPlugin implements PluginServiceGlobalRegistration, PluginServiceRegistrationOptions {
+export class ChartDatasourcePrometheusPlugin {
     id = 'datasource-prometheus';
 
     public beforeInit(chart: Chart, options: any) {
         chart['datasource-prometheus'] = new ChartDatasourcePrometheusPluginInternals();
     }
 
-    public afterInit(chart: Chart, _options: any) {
+    public afterInit(chart: Chart, args: any, _options: any) {
         if (chart.config.type != 'line')
             throw 'ChartDatasourcePrometheusPlugin is already compatible with Line chart\nFeel free to contribute for more!';
         if (!_options)
             throw 'ChartDatasourcePrometheusPlugin.options is undefined';
+
         const options = Object.assign(new ChartDatasourcePrometheusPluginOptions(), _options);
 
         options.assertPluginOptions(); // triggers exceptions
@@ -47,7 +48,7 @@ export class ChartDatasourcePrometheusPlugin implements PluginServiceGlobalRegis
         }
     }
 
-    public beforeUpdate(chart: Chart, _options: any) {
+    public beforeUpdate(chart: Chart, args: any, _options: any) {
         if (!!chart['datasource-prometheus'] && chart['datasource-prometheus'].loading == true)
             return;
         const options = Object.assign(new ChartDatasourcePrometheusPluginOptions(), _options);
@@ -76,14 +77,12 @@ export class ChartDatasourcePrometheusPlugin implements PluginServiceGlobalRegis
         let isHiddenMap = {};
         if (chart.data.datasets.length > 0) {
             for (let oldDataSetIndex in chart.data.datasets) {
-                const oldDataSet: ChartDataSets = chart.data.datasets[oldDataSetIndex];
+                const oldDataSet: ChartDataset = chart.data.datasets[oldDataSetIndex];
                 let metaIndex = 0;
                 for (let id in oldDataSet['_meta']) { metaIndex = id as any as number; } // 🤮
                 isHiddenMap[oldDataSet.label] = !chart.isDatasetVisible(oldDataSet['_meta'][metaIndex].index);
             }
         }
-
-        const yAxes = chart.config.options.scales.yAxes;
 
         // loop over queries
         // when we get all query results, we mix series into a single `datasets` array
@@ -97,7 +96,6 @@ export class ChartDatasourcePrometheusPlugin implements PluginServiceGlobalRegis
                     const seriesCount = datasets.length;
                     const data = result.result.map((serie, i) => {
                         return {
-                            yAxisID: !!yAxes && yAxes.length > 0 ? yAxes[queryIndex % yAxes.length].id : null,
                             tension: options.tension,
                             cubicInterpolationMode: options.cubicInterpolationMode || 'default',
                             stepped: options.stepped,
@@ -105,7 +103,7 @@ export class ChartDatasourcePrometheusPlugin implements PluginServiceGlobalRegis
                             label: selectLabel(options, serie, seriesCount + i),
                             data: serie.values.map((v, j) => {
                                 return {
-                                    t: v.time,
+                                    x: v.time,
                                     y: v.value,
                                 };
                             }),
@@ -113,14 +111,13 @@ export class ChartDatasourcePrometheusPlugin implements PluginServiceGlobalRegis
                             borderColor: selectBorderColor(options, serie, seriesCount + i),
                             borderWidth: options.borderWidth,
                             hidden: isHiddenMap[selectLabel(options, serie, seriesCount + i)] || false,
-                        } as ChartDataSets;
+                        } as ChartDataset;
                     });
 
                     return datasets.concat(...data);
                 }, []);
 
                 chart.data.datasets = datasets;
-
                 // in case there is some data, we make things beautiful
                 if (chart.data.datasets.length > 0) {
                     if (options.fillGaps) {
@@ -149,7 +146,7 @@ export class ChartDatasourcePrometheusPlugin implements PluginServiceGlobalRegis
             });
     }
 
-    public beforeRender(chart: Chart, _options: any) {
+    public beforeRender(chart: Chart, args: any, _options: any) {
         const options = Object.assign(new ChartDatasourcePrometheusPluginOptions(), _options);
 
         if (chart['datasource-prometheus'].error != null) {
@@ -183,7 +180,7 @@ export class ChartDatasourcePrometheusPlugin implements PluginServiceGlobalRegis
         }
     }
 
-    public destroy(chart: Chart) {
+    public destroy(chart: Chart, args: any, _options: any) {
         // auto update
         if (!!chart['datasource-prometheus'].updateInterval)
             clearInterval(chart['datasource-prometheus'].updateInterval);

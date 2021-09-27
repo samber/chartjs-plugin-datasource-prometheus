@@ -177,13 +177,18 @@ class ChartDatasourcePrometheusPluginOptions {
 // enforce xAxes data type to 'time'
 function setTimeAxesOptions(chart) {
     chart.config.options.scales = !!chart.config.options.scales ? chart.config.options.scales : {};
-    chart.config.options.scales.xAxes = !!chart.config.options.scales.xAxes && chart.config.options.scales.xAxes.length > 0 ? chart.config.options.scales.xAxes : [{}];
-    chart.config.options.scales.xAxes[0].time = !!chart.config.options.scales.xAxes[0].time ? chart.config.options.scales.xAxes[0].time : {};
+    chart.config.options.scales.x = !!chart.config.options.scales.x ? chart.config.options.scales.x : {};
+    //chart.config.options.scales.x.type = !!chart.config.options.scales.xAxes[0].time ? chart.config.options.scales.xAxes[0].time : {};
     // https://www.chartjs.org/docs/latest/axes/cartesian/time.html#display-formats
     // chart.config.options.scales.xAxes[0].time.displayFormats = !!chart.config.options.scales.xAxes[0].time['displayFormats'] ? chart.config.options.scales.xAxes[0].time.displayFormats : 'MMM D, hA'; // override default momentjs format for 'hour' time unit
-    chart.config.options.scales.xAxes[0].type = 'time';
-    chart.config.options.scales.xAxes[0].distribution = chart.config.options.scales.xAxes[0].distribution || 'linear';
-    chart.config.options.scales.xAxes[0].time.minUnit = chart.config.options.scales.xAxes[0].time.minUnit || 'second';
+    chart.config.options.scales = {
+        x: {
+            type: 'timeseries',
+            time: {
+                minUnit: 'second'
+            }
+        }
+    };
 }
 // fill NaN values into data from Prometheus to fill Gaps (hole in chart is to show missing metrics from Prometheus)
 // only accept Date objects here
@@ -251,7 +256,7 @@ class ChartDatasourcePrometheusPlugin {
     beforeInit(chart, options) {
         chart['datasource-prometheus'] = new ChartDatasourcePrometheusPluginInternals();
     }
-    afterInit(chart, _options) {
+    afterInit(chart, args, _options) {
         if (chart.config.type != 'line')
             throw 'ChartDatasourcePrometheusPlugin is already compatible with Line chart\nFeel free to contribute for more!';
         if (!_options)
@@ -268,7 +273,7 @@ class ChartDatasourcePrometheusPlugin {
                 chart.update();
         }
     }
-    beforeUpdate(chart, _options) {
+    beforeUpdate(chart, args, _options) {
         if (!!chart['datasource-prometheus'] && chart['datasource-prometheus'].loading == true)
             return;
         const options = Object.assign(new ChartDatasourcePrometheusPluginOptions(), _options);
@@ -300,7 +305,6 @@ class ChartDatasourcePrometheusPlugin {
                 isHiddenMap[oldDataSet.label] = !chart.isDatasetVisible(oldDataSet['_meta'][metaIndex].index);
             }
         }
-        const yAxes = chart.config.options.scales.yAxes;
         // loop over queries
         // when we get all query results, we mix series into a single `datasets` array
         Promise.all(reqs)
@@ -312,7 +316,6 @@ class ChartDatasourcePrometheusPlugin {
                 const seriesCount = datasets.length;
                 const data = result.result.map((serie, i) => {
                     return {
-                        yAxisID: !!yAxes && yAxes.length > 0 ? yAxes[queryIndex % yAxes.length].id : null,
                         tension: options.tension,
                         cubicInterpolationMode: options.cubicInterpolationMode || 'default',
                         stepped: options.stepped,
@@ -320,7 +323,7 @@ class ChartDatasourcePrometheusPlugin {
                         label: selectLabel(options, serie),
                         data: serie.values.map((v, j) => {
                             return {
-                                t: v.time,
+                                x: v.time,
                                 y: v.value,
                             };
                         }),
@@ -355,7 +358,7 @@ class ChartDatasourcePrometheusPlugin {
             throw err;
         });
     }
-    beforeRender(chart, _options) {
+    beforeRender(chart, args, _options) {
         var _a;
         const options = Object.assign(new ChartDatasourcePrometheusPluginOptions(), _options);
         if (chart['datasource-prometheus'].error != null) {
@@ -387,7 +390,7 @@ class ChartDatasourcePrometheusPlugin {
             return;
         }
     }
-    destroy(chart) {
+    destroy(chart, args, _options) {
         // auto update
         if (!!chart['datasource-prometheus'].updateInterval)
             clearInterval(chart['datasource-prometheus'].updateInterval);

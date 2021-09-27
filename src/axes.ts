@@ -1,18 +1,24 @@
 
-import { ChartDataSets } from "chart.js";
+import { Chart, ChartDataset } from "chart.js/auto";
 import { ChartDatasourcePrometheusPluginOptions } from "./options";
 
 // enforce xAxes data type to 'time'
 export function setTimeAxesOptions(chart: Chart) {
     chart.config.options.scales = !!chart.config.options.scales ? chart.config.options.scales : {};
-    chart.config.options.scales.xAxes = !!chart.config.options.scales.xAxes && chart.config.options.scales.xAxes.length > 0 ? chart.config.options.scales.xAxes : [{}];
-    chart.config.options.scales.xAxes[0].time = !!chart.config.options.scales.xAxes[0].time ? chart.config.options.scales.xAxes[0].time : {};
+    chart.config.options.scales.x = !!chart.config.options.scales.x ? chart.config.options.scales.x : {};
+
+    //chart.config.options.scales.x.type = !!chart.config.options.scales.xAxes[0].time ? chart.config.options.scales.xAxes[0].time : {};
     // https://www.chartjs.org/docs/latest/axes/cartesian/time.html#display-formats
     // chart.config.options.scales.xAxes[0].time.displayFormats = !!chart.config.options.scales.xAxes[0].time['displayFormats'] ? chart.config.options.scales.xAxes[0].time.displayFormats : 'MMM D, hA'; // override default momentjs format for 'hour' time unit
 
-    chart.config.options.scales.xAxes[0].type = 'time';
-    chart.config.options.scales.xAxes[0].distribution = chart.config.options.scales.xAxes[0].distribution || 'linear';
-    chart.config.options.scales.xAxes[0].time.minUnit = chart.config.options.scales.xAxes[0].time.minUnit || 'second';
+    chart.config.options.scales = {
+        x: {
+            type: 'timeseries',
+            time: {
+                minUnit: 'second'
+            }
+        }
+    }
 }
 
 // fill NaN values into data from Prometheus to fill Gaps (hole in chart is to show missing metrics from Prometheus)
@@ -21,7 +27,7 @@ export function fillGaps(chart: Chart, start: Date, end: Date, step: number, opt
     let minStep = options.timeRange.minStep || step;
     minStep = minStep >= step ? minStep : step;
 
-    chart.data.datasets.forEach((dataSet: ChartDataSets, index: number) => {
+    chart.data.datasets.forEach((dataSet: ChartDataset, index: number) => {
         // detect missing data in response
         for (let i = dataSet.data.length - 2; i > 0; i--) {
             if ((dataSet.data[i + 1]['t'] - dataSet.data[i]['t']) > (1100 * minStep)) {

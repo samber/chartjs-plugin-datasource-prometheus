@@ -1,4 +1,4 @@
-import { ChartDataSets } from "chart.js";
+import { ChartDataset } from "chart.js";
 import { Metric, PrometheusConnectionOptions } from "prometheus-query";
 export declare class PrometheusTimeRange {
     step?: number | null;
@@ -19,7 +19,7 @@ export declare type ChartDatasourcePrometheusPluginOptionsTimeRange = Prometheus
 export declare type PrometheusQuery = string | ((start: Date, end: Date, step: number) => Promise<any>);
 export declare type PrometheusQueries = PrometheusQuery | PrometheusQuery[];
 export declare type PrometheusSerieHook = (serie: Metric) => string | null;
-export declare type DataSetHook = (datasets: ChartDataSets[]) => ChartDataSets[];
+export declare type DataSetHook = (datasets: ChartDataset[]) => ChartDataset[];
 export declare class ChartDatasourcePrometheusPluginNoDataMsg {
     message?: string;
     font?: string;
