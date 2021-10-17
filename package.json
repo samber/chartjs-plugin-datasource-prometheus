@@ -5,7 +5,7 @@
     "Samuel Berthe",
     "Frantisek Svoboda"
   ],
-  "version": "1.0.5",
+  "version": "1.0.6",
   "license": "MIT",
   "main": "dist/chartjs-plugin-datasource-prometheus.cjs.js",
   "module": "dist/chartjs-plugin-datasource-prometheus.esm.js",
@@ -28,7 +28,7 @@
     "dist/"
   ],
   "dependencies": {
-    "prometheus-query": "^3.1.0"
+    "prometheus-query": "^3.2.0"
   },
   "peerDependencies": {
     "chart.js": ">= 2.7.0 < 3"
