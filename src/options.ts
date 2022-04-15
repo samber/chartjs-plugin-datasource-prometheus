@@ -81,30 +81,15 @@ export class ChartDatasourcePrometheusPluginOptions {
         'rgba(255, 159, 64, 1)'
     ];
     backgroundColor?: string[] = [
-        'transparent',
-        'transparent',
-        'transparent',
-        'transparent',
-        'transparent',
-        'transparent',
-        'transparent',
-        'transparent',
 
-        // 'rgba(0, 63, 92, 0.2)',
-        // 'rgba(47, 75, 124, 0.2)',
-        // 'rgba(102, 81, 145, 0.2)',
-        // 'rgba(160, 81, 149, 0.2)',
-        // 'rgba(212, 80, 135, 0.2)',
-        // 'rgba(249, 93, 106, 0.2)',
-        // 'rgba(255, 124, 67, 0.2)',
-        // 'rgba(255, 166, 0, 0.2)',
+        // 'transparent'
 
-        // 'rgba(255, 99, 132, 0.2)',
-        // 'rgba(54, 162, 235, 0.2)',
-        // 'rgba(255, 206, 86, 0.2)',
-        // 'rgba(75, 192, 192, 0.2)',
-        // 'rgba(153, 102, 255, 0.2)',
-        // 'rgba(255, 159, 64, 0.2)'
+        'rgba(255, 99, 132, 0.2)',
+        'rgba(54, 162, 235, 0.2)',
+        'rgba(255, 206, 86, 0.2)',
+        'rgba(75, 192, 192, 0.2)',
+        'rgba(153, 102, 255, 0.2)',
+        'rgba(255, 159, 64, 0.2)'
     ];
     noDataMsg?: ChartDatasourcePrometheusPluginNoDataMsg = new ChartDatasourcePrometheusPluginNoDataMsg();
     errorMsg?: ChartDatasourcePrometheusPluginErrorMsg = new ChartDatasourcePrometheusPluginErrorMsg();
