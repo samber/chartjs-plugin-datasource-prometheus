@@ -5,7 +5,7 @@
     "Samuel Berthe",
     "Frantisek Svoboda"
   ],
-  "version": "1.0.7",
+  "version": "1.0.8",
   "license": "MIT",
   "main": "dist/chartjs-plugin-datasource-prometheus.cjs.js",
   "module": "dist/chartjs-plugin-datasource-prometheus.esm.js",

@@ -10,7 +10,7 @@ export function selectLabel(options: ChartDatasourcePrometheusPluginOptions, ser
 }
 
 export function selectBackGroundColor(options: ChartDatasourcePrometheusPluginOptions, serie, i) {
-    const defaultValue = options.backgroundColor[i % options.backgroundColor.length];
+    const defaultValue = !options.fill ? 'transparent' : options.backgroundColor[i % options.backgroundColor.length];
     if (options.findInBackgroundColorMap) {
         return options.findInBackgroundColorMap(serie.metric) || defaultValue;
     }
