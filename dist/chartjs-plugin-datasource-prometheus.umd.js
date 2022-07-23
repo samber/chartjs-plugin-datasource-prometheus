@@ -12,7 +12,7 @@
  */
 !function(e,t){"object"==typeof exports&&"undefined"!=typeof module?module.exports=t():"function"==typeof define&&define.amd?define(t):(e="undefined"!=typeof globalThis?globalThis:e||self).ChartDatasourcePrometheusPlugin=t()}(this,(function(){"use strict";"undefined"!=typeof globalThis?globalThis:"undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self&&self;var e={exports:{}};
 /*!
-	 * prometheus-query v3.2.3
+	 * prometheus-query v3.2.5
 	 * github.com/samber/prometheus-query-js
 	 * (c) 2022 prometheus-query-js Contributors
 	 * Released under the MIT License

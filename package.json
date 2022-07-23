@@ -28,7 +28,7 @@
     "dist/"
   ],
   "dependencies": {
-    "prometheus-query": "^3.2.3"
+    "prometheus-query": "^3.2.5"
   },
   "peerDependencies": {
     "chart.js": ">= 2.7.0 < 3"
