@@ -5,11 +5,12 @@
     "Samuel Berthe",
     "Frantisek Svoboda"
   ],
-  "version": "1.0.13",
+  "version": "1.1.0",
   "license": "MIT",
   "main": "dist/chartjs-plugin-datasource-prometheus.cjs.js",
   "module": "dist/chartjs-plugin-datasource-prometheus.esm.js",
   "browser": "dist/chartjs-plugin-datasource-prometheus.umd.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
