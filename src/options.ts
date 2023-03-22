@@ -62,6 +62,7 @@ export class ChartDatasourcePrometheusPluginOptions {
     cubicInterpolationMode?: 'default' | 'monotone' = 'default';
     stepped?: boolean = false;
     fill?: boolean = false;
+    stacked?: boolean = false;
     borderWidth?: number = 3;
     borderColor?: string[] = [
         // 'rgba(0, 63, 92, 1)',

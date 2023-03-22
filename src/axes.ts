@@ -6,19 +6,25 @@ import { ChartDatasourcePrometheusPluginOptions } from "./options";
 export function setTimeAxesOptions(chart: Chart) {
     chart.config.options.scales = !!chart.config.options.scales ? chart.config.options.scales : {};
     chart.config.options.scales.x = !!chart.config.options.scales.x ? chart.config.options.scales.x : {};
+    chart.config.options.scales.y = !!chart.config.options.scales.y ? chart.config.options.scales.y : {};
 
-    //chart.config.options.scales.x.type = !!chart.config.options.scales.xAxes[0].time ? chart.config.options.scales.xAxes[0].time : {};
-    // https://www.chartjs.org/docs/latest/axes/cartesian/time.html#display-formats
-    // chart.config.options.scales.xAxes[0].time.displayFormats = !!chart.config.options.scales.xAxes[0].time['displayFormats'] ? chart.config.options.scales.xAxes[0].time.displayFormats : 'MMM D, hA'; // override default momentjs format for 'hour' time unit
+    const options = chart.config.options.plugins['datasource-prometheus'];
 
-    chart.config.options.scales = {
-        x: {
-            type: 'timeseries',
-            time: {
-                minUnit: 'second'
-            }
+    Object.assign(chart.config.options.scales.x, {
+        type: 'timeseries',
+        ticks: {
+            maxRotation: 0,
+            minRotation: 0
+        },
+        stacked: options.stacked,
+        time: {
+            minUnit: 'second'
         }
-    }
+    });
+
+    Object.assign(chart.config.options.scales.y, {
+        stacked: options.stacked
+    });
 }
 
 // fill NaN values into data from Prometheus to fill Gaps (hole in chart is to show missing metrics from Prometheus)
