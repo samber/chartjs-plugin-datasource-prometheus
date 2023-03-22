@@ -84,6 +84,16 @@ export class ChartDatasourcePrometheusPlugin {
         // loop over queries
         // when we get all query results, we mix series into a single `datasets` array
         chart['datasource-prometheus'].loading = true;
+
+        if (options.loadingMsg) {
+            this.writeText(chart, options.loadingMsg.message, (ctx) => {
+                ctx.direction = options.loadingMsg.direction;
+                ctx.textAlign = options.loadingMsg.textAlign;
+                ctx.textBaseline = options.loadingMsg.textBaseline;
+                ctx.font = options.loadingMsg.font;
+            });
+        }
+
         Promise.all(reqs)
             .then((results) => {
                 // extract data from responses and prepare series for Chart.js
@@ -142,34 +152,35 @@ export class ChartDatasourcePrometheusPlugin {
         const options = Object.assign(new ChartDatasourcePrometheusPluginOptions(), _options);
 
         if (chart['datasource-prometheus'].error != null) {
-            const ctx = chart.ctx;
-            const width = chart.width;
-            const height = chart.height;
-            chart.clear();
-
-            ctx.save();
-            ctx.direction = options.errorMsg.direction;
-            ctx.textAlign = options.errorMsg.textAlign;
-            ctx.textBaseline = options.errorMsg.textBaseline;
-            ctx.font = "16px normal 'Helvetica Nueue'";
-            ctx.fillText(options.errorMsg?.message || chart['datasource-prometheus'].error, width / 2, height / 2);
-            ctx.restore();
-            return;
-        } else if (chart.data.datasets.length == 0) {
-            const ctx = chart.ctx;
-            const width = chart.width;
-            const height = chart.height;
-            chart.clear();
-
-            ctx.save();
-            ctx.direction = options.noDataMsg.direction;
-            ctx.textAlign = options.noDataMsg.textAlign;
-            ctx.textBaseline = options.noDataMsg.textBaseline;
-            ctx.font = options.noDataMsg.font;
-            ctx.fillText(options.noDataMsg.message, width / 2, height / 2);
-            ctx.restore();
-            return;
+            this.writeText(chart, options.errorMsg?.message || chart['datasource-prometheus'].error, (ctx) => {
+                ctx.direction = options.errorMsg.direction;
+                ctx.textAlign = options.errorMsg.textAlign;
+                ctx.textBaseline = options.errorMsg.textBaseline;
+                ctx.font = "16px normal 'Helvetica Nueue'";
+            });
+        } else if (chart.data.datasets.length == 0 && chart['datasource-prometheus'].loading !== true) {
+            this.writeText(chart, options.noDataMsg.message, (ctx) => {
+                ctx.direction = options.noDataMsg.direction;
+                ctx.textAlign = options.noDataMsg.textAlign;
+                ctx.textBaseline = options.noDataMsg.textBaseline;
+                ctx.font = options.noDataMsg.font;
+            });
         }
+    }
+
+    public writeText(chart: Chart, message: string, fn?: (ctx: CanvasRenderingContext2D) => void) {
+        const ctx = chart.ctx;
+        const width = chart.width;
+        const height = chart.height;
+        chart.clear();
+
+        ctx.save();
+        if (fn) {
+            fn(ctx);
+        }
+
+        ctx.fillText(message, width / 2, height / 2);
+        ctx.restore();
     }
 
     public destroy(chart: Chart, args: any, _options: any) {

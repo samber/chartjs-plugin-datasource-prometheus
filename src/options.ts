@@ -43,6 +43,13 @@ export class ChartDatasourcePrometheusPluginErrorMsg {
     textBaseline?: CanvasTextBaseline = 'middle';
     direction?: CanvasDirection = 'ltr';
 }
+export class ChartDatasourcePrometheusPluginLoadingMsg {
+    message?: string = 'Loading data...';
+    font?: string = '16px normal \'Helvetica Nueue\'';
+    textAlign?: CanvasTextAlign = 'center';
+    textBaseline?: CanvasTextBaseline = 'middle';
+    direction?: CanvasDirection = 'ltr';
+}
 
 const colorList = [
     'rgba(255, 99, 132, 1)',
@@ -77,6 +84,7 @@ export class ChartDatasourcePrometheusPluginOptions {
     backgroundColor?: string[] = colorList;
     noDataMsg?: ChartDatasourcePrometheusPluginNoDataMsg = new ChartDatasourcePrometheusPluginNoDataMsg();
     errorMsg?: ChartDatasourcePrometheusPluginErrorMsg = new ChartDatasourcePrometheusPluginErrorMsg();
+    loadingMsg?: ChartDatasourcePrometheusPluginLoadingMsg = new ChartDatasourcePrometheusPluginLoadingMsg();
 
     findInLabelMap?: PrometheusSerieHook | null = null;
     findInBorderColorMap?: PrometheusSerieHook | null = null;
