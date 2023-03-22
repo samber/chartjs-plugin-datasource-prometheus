@@ -44,6 +44,15 @@ export class ChartDatasourcePrometheusPluginErrorMsg {
     direction?: CanvasDirection = 'ltr';
 }
 
+const colorList = [
+    'rgba(255, 99, 132, 1)',
+    'rgba(54, 162, 235, 1)',
+    'rgba(255, 206, 86, 1)',
+    'rgba(75, 192, 192, 1)',
+    'rgba(153, 102, 255, 1)',
+    'rgba(255, 159, 64, 1)'
+];
+
 export class ChartDatasourcePrometheusPluginOptions {
 
     /**
@@ -64,49 +73,8 @@ export class ChartDatasourcePrometheusPluginOptions {
     fill?: boolean = false;
     stacked?: boolean = false;
     borderWidth?: number = 3;
-    borderColor?: string[] = [
-        // 'rgba(0, 63, 92, 1)',
-        // 'rgba(47, 75, 124, 1)',
-        // 'rgba(102, 81, 145, 1)',
-        // 'rgba(160, 81, 149, 1)',
-        // 'rgba(212, 80, 135, 1)',
-        // 'rgba(249, 93, 106, 1)',
-        // 'rgba(255, 124, 67, 1)',
-        // 'rgba(255, 166, 0, 1)',
-
-        'rgba(255, 99, 132, 1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-        'rgba(153, 102, 255, 1)',
-        'rgba(255, 159, 64, 1)'
-    ];
-    backgroundColor?: string[] = [
-        'transparent',
-        'transparent',
-        'transparent',
-        'transparent',
-        'transparent',
-        'transparent',
-        'transparent',
-        'transparent',
-
-        // 'rgba(0, 63, 92, 0.2)',
-        // 'rgba(47, 75, 124, 0.2)',
-        // 'rgba(102, 81, 145, 0.2)',
-        // 'rgba(160, 81, 149, 0.2)',
-        // 'rgba(212, 80, 135, 0.2)',
-        // 'rgba(249, 93, 106, 0.2)',
-        // 'rgba(255, 124, 67, 0.2)',
-        // 'rgba(255, 166, 0, 0.2)',
-
-        // 'rgba(255, 99, 132, 0.2)',
-        // 'rgba(54, 162, 235, 0.2)',
-        // 'rgba(255, 206, 86, 0.2)',
-        // 'rgba(75, 192, 192, 0.2)',
-        // 'rgba(153, 102, 255, 0.2)',
-        // 'rgba(255, 159, 64, 0.2)'
-    ];
+    borderColor?: string[] = colorList;
+    backgroundColor?: string[] = colorList;
     noDataMsg?: ChartDatasourcePrometheusPluginNoDataMsg = new ChartDatasourcePrometheusPluginNoDataMsg();
     errorMsg?: ChartDatasourcePrometheusPluginErrorMsg = new ChartDatasourcePrometheusPluginErrorMsg();
 
@@ -128,11 +96,6 @@ export class ChartDatasourcePrometheusPluginOptions {
             throw new Error('options.timeRange.start is undefined');
         if (this.timeRange.end == null)
             throw new Error('options.timeRange.end is undefined');
-
-        // if (typeof (this.query) != 'string' && !(typeof (this.query) == 'object' && this.query.constructor.name == 'Array'))
-        //     throw new Error('options.query must be a string or an array of strings');
-        // if (typeof (this.query) == 'object' && this.query.constructor.name == 'Array' && (this.query.length == 0 || this.query.length > 10))
-        //     throw new Error('options.query must contains between 1 and 10 queries');
 
         if (typeof (this.timeRange) != 'object')
             throw new Error('options.timeRange must be a object');
