@@ -75,13 +75,9 @@ export class ChartDatasourcePrometheusPlugin {
 
         // look for previously hidden series
         let isHiddenMap = {};
-        if (chart.data.datasets.length > 0) {
-            for (let oldDataSetIndex in chart.data.datasets) {
-                const oldDataSet: ChartDataset = chart.data.datasets[oldDataSetIndex];
-                let metaIndex = 0;
-                for (let id in oldDataSet['_meta']) { metaIndex = id as any as number; } // 🤮
-                isHiddenMap[oldDataSet.label] = !chart.isDatasetVisible(oldDataSet['_meta'][metaIndex].index);
-            }
+        for (let i = 0; i < chart.data.datasets.length; i++) {
+            const oldDataSet: ChartDataset = chart.data.datasets[i];
+            isHiddenMap[oldDataSet.label] = !chart.isDatasetVisible(i);
         }
 
         // loop over queries
