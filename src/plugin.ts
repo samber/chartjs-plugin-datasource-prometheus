@@ -1,6 +1,6 @@
 
 import { PrometheusDriver, QueryResult } from 'prometheus-query';
-import { Chart, ChartDataset } from 'chart.js';
+import { Chart, ChartType, ChartDataset } from 'chart.js';
 
 import datasource from './datasource';
 import { ChartDatasourcePrometheusPluginOptions, PrometheusQuery } from './options';
@@ -28,8 +28,8 @@ export class ChartDatasourcePrometheusPlugin {
     }
 
     public afterInit(chart: Chart, args: any, _options: any) {
-        if (chart.config.type != 'line')
-            throw 'ChartDatasourcePrometheusPlugin is already compatible with Line chart\nFeel free to contribute for more!';
+        if (chart.config['type'] !== "line" as ChartType && chart.config['type'] !== "bar" as ChartType)
+            throw 'ChartDatasourcePrometheusPlugin is only compatible with Line chart\nFeel free to contribute for more!';
         if (!_options)
             throw 'ChartDatasourcePrometheusPlugin.options is undefined';
 
