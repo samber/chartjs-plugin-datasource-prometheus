@@ -10,8 +10,12 @@
 
 #### Dependencies:
 
-- requires [chart.js](https://www.chartjs.org) 2.7 or later.
-- requires [moment.js](https://momentjs.com/) 2.0 or later.
+- requires [chart.js](https://www.chartjs.org) 4.0 or later.
+- requires a chart.js date provider to be registered, one of:
+  - [chartjs-adapter-date-fns](https://github.com/chartjs/chartjs-adapter-date-fns)
+  - [chartjs-adapter-moment](https://github.com/chartjs/chartjs-adapter-moment)
+  - [chartjs-adapter-luxon](https://github.com/chartjs/chartjs-adapter-luxon)
+  - if unsure, chartjs-adapter-date-fns is a good pick
 - requires [prometheus-query](https://github.com/samber/prometheus-query-js) 3.0 or later.
 
 #### Demonstration:
@@ -25,10 +29,11 @@ I would be happy to add links to charts using this library. Feel free to reach m
 - Loads time-series from Prometheus into Chart.js.
 - **Similar to Grafana**, but ported to Chart.js for public-facing web applications.
 - **UMD compatible**, you can use it with any module loader
-- Supports **line chart only** (for now!)
+- Supports **line chart and bar chart only** (for now!)
 - Graph **auto-refresh**
 - Date interval can be **absolute** or **relative** to `now`
 - Multiple Prometheus queries into the same chart
+- Stacked series
 - Custom backend requests (useful for multitenant apps)
 - Hooks available (styling, labeling, data presentation...)
 - Custom chart messages for errors or empty Prometheus responses
@@ -51,13 +56,13 @@ npm install chartjs-plugin-datasource-prometheus --save
 Via CDN:
 
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/Chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datasource-prometheus/dist/chartjs-plugin-datasource-prometheus.umd.min.js"></script>
 ```
 
-💡 Note that chartjs-plugin-datasource-prometheus must be loaded after Chart.js and Moment.js.
+💡 Note that chartjs-plugin-datasource-prometheus must be loaded after Chart.js and the date-fns adapter
 
 ## 💡 Quick start
 
@@ -137,6 +142,7 @@ var myChart = new Chart(ctx, {
 | **tension** | no | Bezier curve tension of the line. Set to 0 to draw straightlines. This option is ignored if monotone cubic interpolation is used | `0.4` |
 | **cubicInterpolationMode** | no | "default" or "monotone" | `"default"` |
 | **stepped** | no | false, true, "before", "middle" or "after" | `false` |
+| **stacked** | no | Whether values are stacked or not | false |
 | **fill** | no | Fills the area under the line | `false` |
 | **borderWidth** | no | Should I explain this field? | `3` |
 | **backgroundColor** | no | Should I explain this field? | See library source code |
