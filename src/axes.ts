@@ -14,7 +14,10 @@ export function setTimeAxesOptions(chart: Chart) {
         type: 'timeseries',
         ticks: {
             maxRotation: 0,
-            minRotation: 0
+            minRotation: 0,
+            major: {
+                enabled: true
+            },
         },
         stacked: options.stacked,
         time: {
