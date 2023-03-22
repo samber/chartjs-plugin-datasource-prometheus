@@ -51,6 +51,7 @@ export class ChartDatasourcePrometheusPlugin {
     public beforeUpdate(chart: Chart, args: any, _options: any) {
         if (!!chart['datasource-prometheus'] && chart['datasource-prometheus'].loading == true)
             return;
+
         const options = Object.assign(new ChartDatasourcePrometheusPluginOptions(), _options);
 
         const prometheus = options.prometheus;
@@ -82,13 +83,11 @@ export class ChartDatasourcePrometheusPlugin {
 
         // loop over queries
         // when we get all query results, we mix series into a single `datasets` array
+        chart['datasource-prometheus'].loading = true;
         Promise.all(reqs)
             .then((results) => {
                 // extract data from responses and prepare series for Chart.js
                 const datasets = results.reduce((datasets, result, queryIndex) => {
-                    if (result.result.length == 0)
-                        return datasets;
-
                     const seriesCount = datasets.length;
                     const data = result.result.map((serie, i) => {
                         return {
@@ -125,24 +124,21 @@ export class ChartDatasourcePrometheusPlugin {
                     }
 
                     setTimeAxesOptions(chart);
-
-                    chart['datasource-prometheus'].loading = true;
-                    chart.update();
-                    chart['datasource-prometheus'].loading = false;
                 }
+                this.resumeRendering(chart);
             })
             .catch((err) => {
                 // reset data and axes
                 chart.data.datasets = [];
-                setTimeAxesOptions(chart);
-
                 chart['datasource-prometheus'].error = 'Failed to fetch data';
-
+                setTimeAxesOptions(chart);
+                this.resumeRendering(chart);
                 throw err;
             });
+        return false;
     }
 
-    public beforeRender(chart: Chart, args: any, _options: any) {
+    public afterDraw(chart: Chart, args: any, _options: any) {
         const options = Object.assign(new ChartDatasourcePrometheusPluginOptions(), _options);
 
         if (chart['datasource-prometheus'].error != null) {
@@ -182,4 +178,9 @@ export class ChartDatasourcePrometheusPlugin {
             clearInterval(chart['datasource-prometheus'].updateInterval);
     }
 
+    private resumeRendering(chart: Chart) {
+        chart['datasource-prometheus'].loading = true;
+        chart.update();
+        chart['datasource-prometheus'].loading = false;
+    }
 };

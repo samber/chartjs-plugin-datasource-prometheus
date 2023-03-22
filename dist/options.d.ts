@@ -50,6 +50,7 @@ export declare class ChartDatasourcePrometheusPluginOptions {
     cubicInterpolationMode?: 'default' | 'monotone';
     stepped?: boolean;
     fill?: boolean;
+    stacked?: boolean;
     borderWidth?: number;
     borderColor?: string[];
     backgroundColor?: string[];
