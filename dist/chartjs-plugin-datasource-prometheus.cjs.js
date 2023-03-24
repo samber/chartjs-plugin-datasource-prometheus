@@ -74,6 +74,15 @@ class ChartDatasourcePrometheusPluginErrorMsg {
         this.direction = 'ltr';
     }
 }
+class ChartDatasourcePrometheusPluginLoadingMsg {
+    constructor() {
+        this.message = 'Loading data...';
+        this.font = '16px normal \'Helvetica Nueue\'';
+        this.textAlign = 'center';
+        this.textBaseline = 'middle';
+        this.direction = 'ltr';
+    }
+}
 const colorList = [
     'rgba(255, 99, 132, 1)',
     'rgba(54, 162, 235, 1)',
@@ -103,6 +112,7 @@ class ChartDatasourcePrometheusPluginOptions {
         this.backgroundColor = colorList;
         this.noDataMsg = new ChartDatasourcePrometheusPluginNoDataMsg();
         this.errorMsg = new ChartDatasourcePrometheusPluginErrorMsg();
+        this.loadingMsg = new ChartDatasourcePrometheusPluginLoadingMsg();
         this.findInLabelMap = null;
         this.findInBorderColorMap = null;
         this.findInBackgroundColorMap = null;
@@ -153,7 +163,10 @@ function setTimeAxesOptions(chart) {
         type: 'timeseries',
         ticks: {
             maxRotation: 0,
-            minRotation: 0
+            minRotation: 0,
+            major: {
+                enabled: true
+            },
         },
         stacked: options.stacked,
         time: {
@@ -172,23 +185,23 @@ function fillGaps(chart, start, end, step, options) {
     chart.data.datasets.forEach((dataSet, index) => {
         // detect missing data in response
         for (let i = dataSet.data.length - 2; i > 0; i--) {
-            if ((dataSet.data[i + 1]['t'] - dataSet.data[i]['t']) > (1100 * minStep)) {
-                for (let steps = (dataSet.data[i + 1]['t'] - dataSet.data[i]['t']) / (minStep * 1000); steps > 1; steps--) {
-                    const value = { t: new Date(dataSet.data[i + 1]['t'].getTime() - minStep * 1000), v: Number.NaN };
+            if ((dataSet.data[i + 1]['x'] - dataSet.data[i]['x']) > (1100 * minStep)) {
+                for (let steps = (dataSet.data[i + 1]['x'] - dataSet.data[i]['x']) / (minStep * 1000); steps > 1; steps--) {
+                    const value = { t: new Date(dataSet.data[i + 1]['x'].getTime() - minStep * 1000), v: Number.NaN };
                     dataSet.data.splice(i + 1, 0, value);
                 }
             }
         }
         // at the start of time range
-        if (Math.abs(start.getTime() - dataSet.data[0]['t']) > (1100 * minStep)) {
-            for (let i = Math.abs(start.getTime() - dataSet.data[0]['t']) / (minStep * 1000); i > 1; i--) {
-                chart.data.datasets[index].data.unshift({ t: new Date(dataSet.data[0]['t'].getTime() - minStep * 1000), v: Number.NaN });
+        if (Math.abs(start.getTime() - dataSet.data[0]['x']) > (1100 * minStep)) {
+            for (let i = Math.abs(start.getTime() - dataSet.data[0]['x']) / (minStep * 1000); i > 1; i--) {
+                chart.data.datasets[index].data.unshift({ x: new Date(dataSet.data[0]['x'].getTime() - minStep * 1000), v: Number.NaN });
             }
         }
         // at the end of time range
-        if (Math.abs(end.getTime() - dataSet.data[dataSet.data.length - 1]['t']) > (1100 * minStep)) {
-            for (let i = Math.abs(end.getTime() - dataSet.data[dataSet.data.length - 1]['t']) / (minStep * 1000); i > 1; i--) {
-                chart.data.datasets[index].data.push({ t: new Date(dataSet.data[chart.data.datasets[index].data.length - 1]['t'].getTime() + minStep * 1000), v: Number.NaN });
+        if (Math.abs(end.getTime() - dataSet.data[dataSet.data.length - 1]['x']) > (1100 * minStep)) {
+            for (let i = Math.abs(end.getTime() - dataSet.data[dataSet.data.length - 1]['x']) / (minStep * 1000); i > 1; i--) {
+                chart.data.datasets[index].data.push({ x: new Date(dataSet.data[chart.data.datasets[index].data.length - 1]['x'].getTime() + minStep * 1000), v: Number.NaN });
             }
         }
     });
@@ -276,6 +289,14 @@ class ChartDatasourcePrometheusPlugin {
         // loop over queries
         // when we get all query results, we mix series into a single `datasets` array
         chart['datasource-prometheus'].loading = true;
+        if (options.loadingMsg) {
+            this.writeText(chart, options.loadingMsg.message, (ctx) => {
+                ctx.direction = options.loadingMsg.direction;
+                ctx.textAlign = options.loadingMsg.textAlign;
+                ctx.textBaseline = options.loadingMsg.textBaseline;
+                ctx.font = options.loadingMsg.font;
+            });
+        }
         Promise.all(reqs)
             .then((results) => {
             // extract data from responses and prepare series for Chart.js
@@ -329,33 +350,33 @@ class ChartDatasourcePrometheusPlugin {
         var _a;
         const options = Object.assign(new ChartDatasourcePrometheusPluginOptions(), _options);
         if (chart['datasource-prometheus'].error != null) {
-            const ctx = chart.ctx;
-            const width = chart.width;
-            const height = chart.height;
-            chart.clear();
-            ctx.save();
-            ctx.direction = options.errorMsg.direction;
-            ctx.textAlign = options.errorMsg.textAlign;
-            ctx.textBaseline = options.errorMsg.textBaseline;
-            ctx.font = "16px normal 'Helvetica Nueue'";
-            ctx.fillText(((_a = options.errorMsg) === null || _a === void 0 ? void 0 : _a.message) || chart['datasource-prometheus'].error, width / 2, height / 2);
-            ctx.restore();
-            return;
+            this.writeText(chart, ((_a = options.errorMsg) === null || _a === void 0 ? void 0 : _a.message) || chart['datasource-prometheus'].error, (ctx) => {
+                ctx.direction = options.errorMsg.direction;
+                ctx.textAlign = options.errorMsg.textAlign;
+                ctx.textBaseline = options.errorMsg.textBaseline;
+                ctx.font = "16px normal 'Helvetica Nueue'";
+            });
         }
-        else if (chart.data.datasets.length == 0) {
-            const ctx = chart.ctx;
-            const width = chart.width;
-            const height = chart.height;
-            chart.clear();
-            ctx.save();
-            ctx.direction = options.noDataMsg.direction;
-            ctx.textAlign = options.noDataMsg.textAlign;
-            ctx.textBaseline = options.noDataMsg.textBaseline;
-            ctx.font = options.noDataMsg.font;
-            ctx.fillText(options.noDataMsg.message, width / 2, height / 2);
-            ctx.restore();
-            return;
+        else if (chart.data.datasets.length == 0 && chart['datasource-prometheus'].loading !== true) {
+            this.writeText(chart, options.noDataMsg.message, (ctx) => {
+                ctx.direction = options.noDataMsg.direction;
+                ctx.textAlign = options.noDataMsg.textAlign;
+                ctx.textBaseline = options.noDataMsg.textBaseline;
+                ctx.font = options.noDataMsg.font;
+            });
         }
+    }
+    writeText(chart, message, fn) {
+        const ctx = chart.ctx;
+        const width = chart.width;
+        const height = chart.height;
+        chart.clear();
+        ctx.save();
+        if (fn) {
+            fn(ctx);
+        }
+        ctx.fillText(message, width / 2, height / 2);
+        ctx.restore();
     }
     destroy(chart, args, _options) {
         // auto update

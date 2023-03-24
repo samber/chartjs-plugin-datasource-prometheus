@@ -34,6 +34,13 @@ export declare class ChartDatasourcePrometheusPluginErrorMsg {
     textBaseline?: CanvasTextBaseline;
     direction?: CanvasDirection;
 }
+export declare class ChartDatasourcePrometheusPluginLoadingMsg {
+    message?: string;
+    font?: string;
+    textAlign?: CanvasTextAlign;
+    textBaseline?: CanvasTextBaseline;
+    direction?: CanvasDirection;
+}
 export declare class ChartDatasourcePrometheusPluginOptions {
     /**
      * Options for Prometheus requests
@@ -56,6 +63,7 @@ export declare class ChartDatasourcePrometheusPluginOptions {
     backgroundColor?: string[];
     noDataMsg?: ChartDatasourcePrometheusPluginNoDataMsg;
     errorMsg?: ChartDatasourcePrometheusPluginErrorMsg;
+    loadingMsg?: ChartDatasourcePrometheusPluginLoadingMsg;
     findInLabelMap?: PrometheusSerieHook | null;
     findInBorderColorMap?: PrometheusSerieHook | null;
     findInBackgroundColorMap?: PrometheusSerieHook | null;
