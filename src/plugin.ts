@@ -16,6 +16,7 @@ import {
 
 class ChartDatasourcePrometheusPluginInternals {
     loading: boolean = false;
+    rendering: boolean = false;
     updateInterval: any | null = null;
     error: string | null = null;
 }
@@ -49,7 +50,9 @@ export class ChartDatasourcePrometheusPlugin {
     }
 
     public beforeUpdate(chart: Chart, args: any, _options: any) {
-        if (!!chart['datasource-prometheus'] && chart['datasource-prometheus'].loading == true)
+        if (!!chart['datasource-prometheus']
+            && (chart['datasource-prometheus'].loading === true
+                || chart['datasource-prometheus'].rendering === true))
             return;
 
         const options = Object.assign(new ChartDatasourcePrometheusPluginOptions(), _options);
@@ -84,15 +87,7 @@ export class ChartDatasourcePrometheusPlugin {
         // loop over queries
         // when we get all query results, we mix series into a single `datasets` array
         chart['datasource-prometheus'].loading = true;
-
-        if (options.loadingMsg) {
-            this.writeText(chart, options.loadingMsg.message, (ctx) => {
-                ctx.direction = options.loadingMsg.direction;
-                ctx.textAlign = options.loadingMsg.textAlign;
-                ctx.textBaseline = options.loadingMsg.textBaseline;
-                ctx.font = options.loadingMsg.font;
-            });
-        }
+        this.updateMessage(chart, _options);
 
         Promise.all(reqs)
             .then((results) => {
@@ -149,6 +144,10 @@ export class ChartDatasourcePrometheusPlugin {
     }
 
     public afterDraw(chart: Chart, args: any, _options: any) {
+        this.updateMessage(chart, _options);
+    }
+
+    public updateMessage(chart: Chart, _options: any) {
         const options = Object.assign(new ChartDatasourcePrometheusPluginOptions(), _options);
 
         if (chart['datasource-prometheus'].error != null) {
@@ -158,7 +157,16 @@ export class ChartDatasourcePrometheusPlugin {
                 ctx.textBaseline = options.errorMsg.textBaseline;
                 ctx.font = "16px normal 'Helvetica Nueue'";
             });
-        } else if (chart.data.datasets.length == 0 && chart['datasource-prometheus'].loading !== true) {
+        } else if (chart['datasource-prometheus'].loading == true) {
+            if (options.loadingMsg) {
+                this.writeText(chart, options.loadingMsg.message, (ctx) => {
+                    ctx.direction = options.loadingMsg.direction;
+                    ctx.textAlign = options.loadingMsg.textAlign;
+                    ctx.textBaseline = options.loadingMsg.textBaseline;
+                    ctx.font = options.loadingMsg.font;
+                });
+            }
+        } else if (chart.data.datasets.length == 0) {
             this.writeText(chart, options.noDataMsg.message, (ctx) => {
                 ctx.direction = options.noDataMsg.direction;
                 ctx.textAlign = options.noDataMsg.textAlign;
@@ -190,8 +198,9 @@ export class ChartDatasourcePrometheusPlugin {
     }
 
     private resumeRendering(chart: Chart) {
-        chart['datasource-prometheus'].loading = true;
-        chart.update();
         chart['datasource-prometheus'].loading = false;
+        chart['datasource-prometheus'].rendering = true;
+        chart.update();
+        chart['datasource-prometheus'].rendering = false;
     }
 };
