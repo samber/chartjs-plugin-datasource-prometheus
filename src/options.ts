@@ -1,5 +1,5 @@
 
-import { ChartDataSets } from "chart.js";
+import { ChartDataset } from "chart.js";
 import { Metric, PrometheusConnectionOptions, QueryResult } from "prometheus-query";
 
 // Mixin for TimeRange field
@@ -27,7 +27,7 @@ export type PrometheusQuery = string | ((start: Date, end: Date, step: number) =
 export type PrometheusQueries = PrometheusQuery | PrometheusQuery[];
 
 export type PrometheusSerieHook = (serie: Metric) => string | null;
-export type DataSetHook = (datasets: ChartDataSets[]) => ChartDataSets[];
+export type DataSetHook = (datasets: ChartDataset[]) => ChartDataset[];
 
 export class ChartDatasourcePrometheusPluginNoDataMsg {
     message?: string = 'No data to display';
@@ -43,6 +43,22 @@ export class ChartDatasourcePrometheusPluginErrorMsg {
     textBaseline?: CanvasTextBaseline = 'middle';
     direction?: CanvasDirection = 'ltr';
 }
+export class ChartDatasourcePrometheusPluginLoadingMsg {
+    message?: string = 'Loading data...';
+    font?: string = '16px normal \'Helvetica Nueue\'';
+    textAlign?: CanvasTextAlign = 'center';
+    textBaseline?: CanvasTextBaseline = 'middle';
+    direction?: CanvasDirection = 'ltr';
+}
+
+const colorList = [
+    'rgba(255, 99, 132, 1)',
+    'rgba(54, 162, 235, 1)',
+    'rgba(255, 206, 86, 1)',
+    'rgba(75, 192, 192, 1)',
+    'rgba(153, 102, 255, 1)',
+    'rgba(255, 159, 64, 1)'
+];
 
 export class ChartDatasourcePrometheusPluginOptions {
 
@@ -62,37 +78,13 @@ export class ChartDatasourcePrometheusPluginOptions {
     cubicInterpolationMode?: 'default' | 'monotone' = 'default';
     stepped?: boolean = false;
     fill?: boolean = false;
+    stacked?: boolean = false;
     borderWidth?: number = 3;
-    borderColor?: string[] = [
-        // 'rgba(0, 63, 92, 1)',
-        // 'rgba(47, 75, 124, 1)',
-        // 'rgba(102, 81, 145, 1)',
-        // 'rgba(160, 81, 149, 1)',
-        // 'rgba(212, 80, 135, 1)',
-        // 'rgba(249, 93, 106, 1)',
-        // 'rgba(255, 124, 67, 1)',
-        // 'rgba(255, 166, 0, 1)',
-
-        'rgba(255, 99, 132, 1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-        'rgba(153, 102, 255, 1)',
-        'rgba(255, 159, 64, 1)'
-    ];
-    backgroundColor?: string[] = [
-
-        // 'transparent'
-
-        'rgba(255, 99, 132, 0.2)',
-        'rgba(54, 162, 235, 0.2)',
-        'rgba(255, 206, 86, 0.2)',
-        'rgba(75, 192, 192, 0.2)',
-        'rgba(153, 102, 255, 0.2)',
-        'rgba(255, 159, 64, 0.2)'
-    ];
+    borderColor?: string[] = colorList;
+    backgroundColor?: string[] = colorList;
     noDataMsg?: ChartDatasourcePrometheusPluginNoDataMsg = new ChartDatasourcePrometheusPluginNoDataMsg();
     errorMsg?: ChartDatasourcePrometheusPluginErrorMsg = new ChartDatasourcePrometheusPluginErrorMsg();
+    loadingMsg?: ChartDatasourcePrometheusPluginLoadingMsg = new ChartDatasourcePrometheusPluginLoadingMsg();
 
     findInLabelMap?: PrometheusSerieHook | null = null;
     findInBorderColorMap?: PrometheusSerieHook | null = null;
@@ -112,11 +104,6 @@ export class ChartDatasourcePrometheusPluginOptions {
             throw new Error('options.timeRange.start is undefined');
         if (this.timeRange.end == null)
             throw new Error('options.timeRange.end is undefined');
-
-        // if (typeof (this.query) != 'string' && !(typeof (this.query) == 'object' && this.query.constructor.name == 'Array'))
-        //     throw new Error('options.query must be a string or an array of strings');
-        // if (typeof (this.query) == 'object' && this.query.constructor.name == 'Array' && (this.query.length == 0 || this.query.length > 10))
-        //     throw new Error('options.query must contains between 1 and 10 queries');
 
         if (typeof (this.timeRange) != 'object')
             throw new Error('options.timeRange must be a object');

@@ -1,6 +1,6 @@
 
 import { PrometheusDriver, QueryResult } from 'prometheus-query';
-import { Chart, ChartDataSets, PluginServiceGlobalRegistration, PluginServiceRegistrationOptions } from 'chart.js';
+import { Chart, ChartType, ChartDataset } from 'chart.js';
 
 import datasource from './datasource';
 import { ChartDatasourcePrometheusPluginOptions, PrometheusQuery } from './options';
@@ -20,18 +20,19 @@ class ChartDatasourcePrometheusPluginInternals {
     error: string | null = null;
 }
 
-export class ChartDatasourcePrometheusPlugin implements PluginServiceGlobalRegistration, PluginServiceRegistrationOptions {
+export class ChartDatasourcePrometheusPlugin {
     id = 'datasource-prometheus';
 
     public beforeInit(chart: Chart, options: any) {
         chart['datasource-prometheus'] = new ChartDatasourcePrometheusPluginInternals();
     }
 
-    public afterInit(chart: Chart, _options: any) {
-        if (chart.config.type != 'line')
-            throw 'ChartDatasourcePrometheusPlugin is already compatible with Line chart\nFeel free to contribute for more!';
+    public afterInit(chart: Chart, args: any, _options: any) {
+        if (chart.config['type'] !== "line" as ChartType && chart.config['type'] !== "bar" as ChartType)
+            throw 'ChartDatasourcePrometheusPlugin is only compatible with Line chart\nFeel free to contribute for more!';
         if (!_options)
             throw 'ChartDatasourcePrometheusPlugin.options is undefined';
+
         const options = Object.assign(new ChartDatasourcePrometheusPluginOptions(), _options);
 
         options.assertPluginOptions(); // triggers exceptions
@@ -47,7 +48,7 @@ export class ChartDatasourcePrometheusPlugin implements PluginServiceGlobalRegis
         }
     }
 
-    public beforeUpdate(chart: Chart, _options: any) {
+    public beforeUpdate(chart: Chart, args: any, _options: any) {
         if (!!chart['datasource-prometheus'] && chart['datasource-prometheus'].loading == true)
             return;
 
@@ -75,20 +76,24 @@ export class ChartDatasourcePrometheusPlugin implements PluginServiceGlobalRegis
 
         // look for previously hidden series
         let isHiddenMap = {};
-        if (chart.data.datasets.length > 0) {
-            for (let oldDataSetIndex in chart.data.datasets) {
-                const oldDataSet: ChartDataSets = chart.data.datasets[oldDataSetIndex];
-                let metaIndex = 0;
-                for (let id in oldDataSet['_meta']) { metaIndex = id as any as number; } // 🤮
-                isHiddenMap[oldDataSet.label] = !chart.isDatasetVisible(oldDataSet['_meta'][metaIndex].index);
-            }
+        for (let i = 0; i < chart.data.datasets.length; i++) {
+            const oldDataSet: ChartDataset = chart.data.datasets[i];
+            isHiddenMap[oldDataSet.label] = !chart.isDatasetVisible(i);
         }
-
-        const yAxes = chart.config.options.scales.yAxes;
 
         // loop over queries
         // when we get all query results, we mix series into a single `datasets` array
         chart['datasource-prometheus'].loading = true;
+
+        if (options.loadingMsg) {
+            this.writeText(chart, options.loadingMsg.message, (ctx) => {
+                ctx.direction = options.loadingMsg.direction;
+                ctx.textAlign = options.loadingMsg.textAlign;
+                ctx.textBaseline = options.loadingMsg.textBaseline;
+                ctx.font = options.loadingMsg.font;
+            });
+        }
+
         Promise.all(reqs)
             .then((results) => {
                 // extract data from responses and prepare series for Chart.js
@@ -96,7 +101,6 @@ export class ChartDatasourcePrometheusPlugin implements PluginServiceGlobalRegis
                     const seriesCount = datasets.length;
                     const data = result.result.map((serie, i) => {
                         return {
-                            yAxisID: !!yAxes && yAxes.length > 0 ? yAxes[queryIndex % yAxes.length].id : null,
                             tension: options.tension,
                             cubicInterpolationMode: options.cubicInterpolationMode || 'default',
                             stepped: options.stepped,
@@ -104,7 +108,7 @@ export class ChartDatasourcePrometheusPlugin implements PluginServiceGlobalRegis
                             label: selectLabel(options, serie, seriesCount + i),
                             data: serie.values.map((v, j) => {
                                 return {
-                                    t: v.time,
+                                    x: v.time,
                                     y: v.value,
                                 };
                             }),
@@ -112,14 +116,13 @@ export class ChartDatasourcePrometheusPlugin implements PluginServiceGlobalRegis
                             borderColor: selectBorderColor(options, serie, seriesCount + i),
                             borderWidth: options.borderWidth,
                             hidden: isHiddenMap[selectLabel(options, serie, seriesCount + i)] || false,
-                        } as ChartDataSets;
+                        } as ChartDataset;
                     });
 
                     return datasets.concat(...data);
                 }, []);
 
                 chart.data.datasets = datasets;
-
                 // in case there is some data, we make things beautiful
                 if (chart.data.datasets.length > 0) {
                     if (options.fillGaps) {
@@ -145,41 +148,42 @@ export class ChartDatasourcePrometheusPlugin implements PluginServiceGlobalRegis
         return false;
     }
 
-    public afterDraw(chart: Chart, _options: any) {
+    public afterDraw(chart: Chart, args: any, _options: any) {
         const options = Object.assign(new ChartDatasourcePrometheusPluginOptions(), _options);
 
         if (chart['datasource-prometheus'].error != null) {
-            const ctx = chart.ctx;
-            const width = chart.width;
-            const height = chart.height;
-            chart.clear();
-
-            ctx.save();
-            ctx.direction = options.errorMsg.direction;
-            ctx.textAlign = options.errorMsg.textAlign;
-            ctx.textBaseline = options.errorMsg.textBaseline;
-            ctx.font = "16px normal 'Helvetica Nueue'";
-            ctx.fillText(options.errorMsg?.message || chart['datasource-prometheus'].error, width / 2, height / 2);
-            ctx.restore();
-            return;
-        } else if (chart.data.datasets.length == 0) {
-            const ctx = chart.ctx;
-            const width = chart.width;
-            const height = chart.height;
-            chart.clear();
-
-            ctx.save();
-            ctx.direction = options.noDataMsg.direction;
-            ctx.textAlign = options.noDataMsg.textAlign;
-            ctx.textBaseline = options.noDataMsg.textBaseline;
-            ctx.font = options.noDataMsg.font;
-            ctx.fillText(options.noDataMsg.message, width / 2, height / 2);
-            ctx.restore();
-            return;
+            this.writeText(chart, options.errorMsg?.message || chart['datasource-prometheus'].error, (ctx) => {
+                ctx.direction = options.errorMsg.direction;
+                ctx.textAlign = options.errorMsg.textAlign;
+                ctx.textBaseline = options.errorMsg.textBaseline;
+                ctx.font = "16px normal 'Helvetica Nueue'";
+            });
+        } else if (chart.data.datasets.length == 0 && chart['datasource-prometheus'].loading !== true) {
+            this.writeText(chart, options.noDataMsg.message, (ctx) => {
+                ctx.direction = options.noDataMsg.direction;
+                ctx.textAlign = options.noDataMsg.textAlign;
+                ctx.textBaseline = options.noDataMsg.textBaseline;
+                ctx.font = options.noDataMsg.font;
+            });
         }
     }
 
-    public destroy(chart: Chart) {
+    public writeText(chart: Chart, message: string, fn?: (ctx: CanvasRenderingContext2D) => void) {
+        const ctx = chart.ctx;
+        const width = chart.width;
+        const height = chart.height;
+        chart.clear();
+
+        ctx.save();
+        if (fn) {
+            fn(ctx);
+        }
+
+        ctx.fillText(message, width / 2, height / 2);
+        ctx.restore();
+    }
+
+    public destroy(chart: Chart, args: any, _options: any) {
         // auto update
         if (!!chart['datasource-prometheus'].updateInterval)
             clearInterval(chart['datasource-prometheus'].updateInterval);
