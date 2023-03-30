@@ -238,6 +238,22 @@ var myChart = new Chart(ctx, {
 });
 ```
 
+### Update
+
+Query update:
+
+```js
+chart.options.plugins['datasource-prometheus'].query = "new query";
+chart.update({});
+```
+
+Start/end range update:
+
+```js
+chart.options.plugins['datasource-prometheus'].timeRange.start = startTime;
+chart.update({});
+```
+
 ### Custom queries
 
 In the context of a multitenant application, it is not a good idea to write a query on the browser side. In that scenario, you may need to send a custom request to your backend, which is responsible for doing the final Prometheus query.
