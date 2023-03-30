@@ -75,7 +75,7 @@ chartjs-plugin-datasource-prometheus can be used with ES6 modules, plain JavaScr
 Then, you need to register the plugin to enable it for all charts in the page.
 
 ```js
-Chart.plugins.register(ChartDatasourcePrometheusPlugin);
+Chart.registry.plugins.register(ChartDatasourcePrometheusPlugin);
 ```
 
 Or, you can enable the plugin only for specific charts.
