@@ -185,7 +185,7 @@ function fillGaps(chart, start, end, step, options) {
         for (let i = dataSet.data.length - 2; i > 0; i--) {
             if ((dataSet.data[i + 1]['x'] - dataSet.data[i]['x']) > (1100 * minStep)) {
                 for (let steps = (dataSet.data[i + 1]['x'] - dataSet.data[i]['x']) / (minStep * 1000); steps > 1; steps--) {
-                    const value = { t: new Date(dataSet.data[i + 1]['x'].getTime() - minStep * 1000), v: Number.NaN };
+                    const value = { x: new Date(dataSet.data[i + 1]['x'].getTime() - minStep * 1000), v: Number.NaN };
                     dataSet.data.splice(i + 1, 0, value);
                 }
             }
@@ -230,6 +230,7 @@ function selectBorderColor(options, serie, i) {
 class ChartDatasourcePrometheusPluginInternals {
     constructor() {
         this.loading = false;
+        this.rendering = false;
         this.updateInterval = null;
         this.error = null;
     }
@@ -259,7 +260,9 @@ class ChartDatasourcePrometheusPlugin {
         }
     }
     beforeUpdate(chart, args, _options) {
-        if (!!chart['datasource-prometheus'] && chart['datasource-prometheus'].loading == true)
+        if (!!chart['datasource-prometheus']
+            && (chart['datasource-prometheus'].loading === true
+                || chart['datasource-prometheus'].rendering === true))
             return;
         const options = Object.assign(new ChartDatasourcePrometheusPluginOptions(), _options);
         const prometheus = options.prometheus;
@@ -287,14 +290,7 @@ class ChartDatasourcePrometheusPlugin {
         // loop over queries
         // when we get all query results, we mix series into a single `datasets` array
         chart['datasource-prometheus'].loading = true;
-        if (options.loadingMsg) {
-            this.writeText(chart, options.loadingMsg.message, (ctx) => {
-                ctx.direction = options.loadingMsg.direction;
-                ctx.textAlign = options.loadingMsg.textAlign;
-                ctx.textBaseline = options.loadingMsg.textBaseline;
-                ctx.font = options.loadingMsg.font;
-            });
-        }
+        this.updateMessage(chart, _options);
         Promise.all(reqs)
             .then((results) => {
             // extract data from responses and prepare series for Chart.js
@@ -345,6 +341,9 @@ class ChartDatasourcePrometheusPlugin {
         return false;
     }
     afterDraw(chart, args, _options) {
+        this.updateMessage(chart, _options);
+    }
+    updateMessage(chart, _options) {
         var _a;
         const options = Object.assign(new ChartDatasourcePrometheusPluginOptions(), _options);
         if (chart['datasource-prometheus'].error != null) {
@@ -355,7 +354,17 @@ class ChartDatasourcePrometheusPlugin {
                 ctx.font = "16px normal 'Helvetica Nueue'";
             });
         }
-        else if (chart.data.datasets.length == 0 && chart['datasource-prometheus'].loading !== true) {
+        else if (chart['datasource-prometheus'].loading == true) {
+            if (options.loadingMsg) {
+                this.writeText(chart, options.loadingMsg.message, (ctx) => {
+                    ctx.direction = options.loadingMsg.direction;
+                    ctx.textAlign = options.loadingMsg.textAlign;
+                    ctx.textBaseline = options.loadingMsg.textBaseline;
+                    ctx.font = options.loadingMsg.font;
+                });
+            }
+        }
+        else if (chart.data.datasets.length == 0) {
             this.writeText(chart, options.noDataMsg.message, (ctx) => {
                 ctx.direction = options.noDataMsg.direction;
                 ctx.textAlign = options.noDataMsg.textAlign;
@@ -382,9 +391,10 @@ class ChartDatasourcePrometheusPlugin {
             clearInterval(chart['datasource-prometheus'].updateInterval);
     }
     resumeRendering(chart) {
-        chart['datasource-prometheus'].loading = true;
-        chart.update();
         chart['datasource-prometheus'].loading = false;
+        chart['datasource-prometheus'].rendering = true;
+        chart.update();
+        chart['datasource-prometheus'].rendering = false;
     }
 }
 
