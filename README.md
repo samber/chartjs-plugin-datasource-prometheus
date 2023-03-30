@@ -29,7 +29,7 @@ I would be happy to add links to charts using this library. Feel free to reach m
 - Loads time-series from Prometheus into Chart.js.
 - **Similar to Grafana**, but ported to Chart.js for public-facing web applications.
 - **UMD compatible**, you can use it with any module loader
-- Supports **line chart and bar chart only** (for now!)
+- Have been tested with *line chart* and (stacked) *bar chart*. The library should be compatible with more chart types.
 - Graph **auto-refresh**
 - Date interval can be **absolute** or **relative** to `now`
 - Multiple Prometheus queries into the same chart
