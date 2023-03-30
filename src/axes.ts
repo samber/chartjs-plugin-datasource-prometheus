@@ -41,7 +41,7 @@ export function fillGaps(chart: Chart, start: Date, end: Date, step: number, opt
         for (let i = dataSet.data.length - 2; i > 0; i--) {
             if ((dataSet.data[i + 1]['x'] - dataSet.data[i]['x']) > (1100 * minStep)) {
                 for (let steps = (dataSet.data[i + 1]['x'] - dataSet.data[i]['x']) / (minStep * 1000); steps > 1; steps--) {
-                    const value = { t: new Date(dataSet.data[i + 1]['x'].getTime() - minStep * 1000), v: Number.NaN };
+                    const value = { x: new Date(dataSet.data[i + 1]['x'].getTime() - minStep * 1000), v: Number.NaN };
                     (dataSet.data as any).splice(i + 1, 0, value);
                 }
             }
