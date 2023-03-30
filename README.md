@@ -55,11 +55,12 @@ npm install chartjs-plugin-datasource-prometheus --save
 
 Via CDN:
 
+Add inside of `<head>` the following:
 ```html
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/Chart.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/Chart.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js" crossorigin="anonymous"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datasource-prometheus/dist/chartjs-plugin-datasource-prometheus.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datasource-prometheus/dist/chartjs-plugin-datasource-prometheus.umd.min.js" crossorigin="anonymous"></script>
 ```
 
 💡 Note that chartjs-plugin-datasource-prometheus must be loaded after Chart.js and the date-fns adapter
