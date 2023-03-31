@@ -59,7 +59,7 @@ Add inside of `<head>` the following:
 ```html
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3/dist/chartjs-adapter-date-fns.bundle.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datasource-prometheus@2.0/dist/chartjs-plugin-datasource-prometheus.umd.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datasource-prometheus@2/dist/chartjs-plugin-datasource-prometheus.umd.min.js" crossorigin="anonymous"></script>
 ```
 
 💡 Note that chartjs-plugin-datasource-prometheus must be loaded after Chart.js and the date-fns adapter.
