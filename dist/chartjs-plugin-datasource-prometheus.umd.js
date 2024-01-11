@@ -1,13 +1,13 @@
 /*!
- * chartjs-plugin-datasource-prometheus v2.1.2
+ * chartjs-plugin-datasource-prometheus v2.1.3
  * github.com/samber/chartjs-plugin-datasource-prometheus
- * (c) 2023 chartjs-plugin-datasource-prometheus Contributors
+ * (c) 2024 chartjs-plugin-datasource-prometheus Contributors
  * Released under the MIT License
  */
 /*!
- * chartjs-plugin-datasource-prometheus v2.1.2
+ * chartjs-plugin-datasource-prometheus v2.1.3
  * github.com/samber/chartjs-plugin-datasource-prometheus
- * (c) 2023 chartjs-plugin-datasource-prometheus Contributors
+ * (c) 2024 chartjs-plugin-datasource-prometheus Contributors
  * Released under the MIT License
  */
 !function(e,t){"object"==typeof exports&&"undefined"!=typeof module?module.exports=t():"function"==typeof define&&define.amd?define(t):(e="undefined"!=typeof globalThis?globalThis:e||self).ChartDatasourcePrometheusPlugin=t()}(this,(function(){"use strict";var e="undefined"!=typeof globalThis?globalThis:"undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:{},t={exports:{}};
