@@ -191,7 +191,7 @@ export class ChartDatasourcePrometheusPlugin {
         ctx.restore();
     }
 
-    public destroy(chart: Chart, args: any, _options: any) {
+    public afterDestroy(chart: Chart, args: any, _options: any) {
         // auto update
         if (!!chart['datasource-prometheus'].updateInterval)
             clearInterval(chart['datasource-prometheus'].updateInterval);
