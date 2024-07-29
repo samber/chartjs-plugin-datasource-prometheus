@@ -387,7 +387,7 @@ class ChartDatasourcePrometheusPlugin {
         ctx.fillText(message, width / 2, height / 2);
         ctx.restore();
     }
-    destroy(chart, args, _options) {
+    afterDestroy(chart, args, _options) {
         // auto update
         if (!!chart['datasource-prometheus'].updateInterval)
             clearInterval(chart['datasource-prometheus'].updateInterval);
