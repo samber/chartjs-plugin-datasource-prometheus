@@ -153,26 +153,27 @@ class ChartDatasourcePrometheusPluginOptions {
 
 // enforce xAxes data type to 'time'
 function setTimeAxesOptions(chart) {
-    chart.config.options.scales = !!chart.config.options.scales ? chart.config.options.scales : {};
-    chart.config.options.scales.x = !!chart.config.options.scales.x ? chart.config.options.scales.x : {};
-    chart.config.options.scales.y = !!chart.config.options.scales.y ? chart.config.options.scales.y : {};
-    const options = chart.config.options.plugins['datasource-prometheus'];
+    chart.config.options.scales = !!chart.config.options.scales
+        ? chart.config.options.scales
+        : {};
+    chart.config.options.scales.x = !!chart.config.options.scales.x
+        ? chart.config.options.scales.x
+        : {};
+    chart.config.options.scales.y = !!chart.config.options.scales.y
+        ? chart.config.options.scales.y
+        : {};
+    const options = chart.config.options.plugins["datasource-prometheus"];
+    const { ticks, time } = JSON.parse(JSON.stringify(chart.config.options.scales.x));
     Object.assign(chart.config.options.scales.x, {
-        type: 'timeseries',
-        ticks: {
-            maxRotation: 0,
-            minRotation: 0,
-            major: {
-                enabled: true
-            },
-        },
+        type: "timeseries",
+        ticks: Object.assign({ maxRotation: 0, minRotation: 0, major: {
+                enabled: true,
+            } }, ticks),
         stacked: options.stacked,
-        time: {
-            minUnit: 'second'
-        }
+        time: Object.assign({ minUnit: "second" }, time),
     });
     Object.assign(chart.config.options.scales.y, {
-        stacked: options.stacked
+        stacked: options.stacked,
     });
 }
 // fill NaN values into data from Prometheus to fill Gaps (hole in chart is to show missing metrics from Prometheus)
@@ -183,23 +184,36 @@ function fillGaps(chart, start, end, step, options) {
     chart.data.datasets.forEach((dataSet, index) => {
         // detect missing data in response
         for (let i = dataSet.data.length - 2; i > 0; i--) {
-            if ((dataSet.data[i + 1]['x'] - dataSet.data[i]['x']) > (1100 * minStep)) {
-                for (let steps = (dataSet.data[i + 1]['x'] - dataSet.data[i]['x']) / (minStep * 1000); steps > 1; steps--) {
-                    const value = { x: new Date(dataSet.data[i + 1]['x'].getTime() - minStep * 1000), v: Number.NaN };
+            if (dataSet.data[i + 1]["x"] - dataSet.data[i]["x"] > 1100 * minStep) {
+                for (let steps = (dataSet.data[i + 1]["x"] - dataSet.data[i]["x"]) /
+                    (minStep * 1000); steps > 1; steps--) {
+                    const value = {
+                        x: new Date(dataSet.data[i + 1]["x"].getTime() - minStep * 1000),
+                        v: Number.NaN,
+                    };
                     dataSet.data.splice(i + 1, 0, value);
                 }
             }
         }
         // at the start of time range
-        if (Math.abs(start.getTime() - dataSet.data[0]['x']) > (1100 * minStep)) {
-            for (let i = Math.abs(start.getTime() - dataSet.data[0]['x']) / (minStep * 1000); i > 1; i--) {
-                chart.data.datasets[index].data.unshift({ x: new Date(dataSet.data[0]['x'].getTime() - minStep * 1000), v: Number.NaN });
+        if (Math.abs(start.getTime() - dataSet.data[0]["x"]) > 1100 * minStep) {
+            for (let i = Math.abs(start.getTime() - dataSet.data[0]["x"]) / (minStep * 1000); i > 1; i--) {
+                chart.data.datasets[index].data.unshift({
+                    x: new Date(dataSet.data[0]["x"].getTime() - minStep * 1000),
+                    v: Number.NaN,
+                });
             }
         }
         // at the end of time range
-        if (Math.abs(end.getTime() - dataSet.data[dataSet.data.length - 1]['x']) > (1100 * minStep)) {
-            for (let i = Math.abs(end.getTime() - dataSet.data[dataSet.data.length - 1]['x']) / (minStep * 1000); i > 1; i--) {
-                chart.data.datasets[index].data.push({ x: new Date(dataSet.data[chart.data.datasets[index].data.length - 1]['x'].getTime() + minStep * 1000), v: Number.NaN });
+        if (Math.abs(end.getTime() - dataSet.data[dataSet.data.length - 1]["x"]) >
+            1100 * minStep) {
+            for (let i = Math.abs(end.getTime() - dataSet.data[dataSet.data.length - 1]["x"]) /
+                (minStep * 1000); i > 1; i--) {
+                chart.data.datasets[index].data.push({
+                    x: new Date(dataSet.data[chart.data.datasets[index].data.length - 1]["x"].getTime() +
+                        minStep * 1000),
+                    v: Number.NaN,
+                });
             }
         }
     });
