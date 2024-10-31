@@ -15,11 +15,11 @@ export interface PrometheusTimeRangeAbsolute {
     start: Date;
     end: Date;
 }
-export declare type ChartDatasourcePrometheusPluginOptionsTimeRange = PrometheusTimeRange & (PrometheusTimeRangeRelative | PrometheusTimeRangeAbsolute);
-export declare type PrometheusQuery = string | ((start: Date, end: Date, step: number) => Promise<any>);
-export declare type PrometheusQueries = PrometheusQuery | PrometheusQuery[];
-export declare type PrometheusSerieHook = (serie: Metric) => string | null;
-export declare type DataSetHook = (datasets: ChartDataset[]) => ChartDataset[];
+export type ChartDatasourcePrometheusPluginOptionsTimeRange = PrometheusTimeRange & (PrometheusTimeRangeRelative | PrometheusTimeRangeAbsolute);
+export type PrometheusQuery = string | ((start: Date, end: Date, step: number) => Promise<any>);
+export type PrometheusQueries = PrometheusQuery | PrometheusQuery[];
+export type PrometheusSerieHook = (serie: Metric) => string | null;
+export type DataSetHook = (datasets: ChartDataset[]) => ChartDataset[];
 export declare class ChartDatasourcePrometheusPluginNoDataMsg {
     message?: string;
     font?: string;
