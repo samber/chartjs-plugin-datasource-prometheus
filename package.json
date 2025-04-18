@@ -1,68 +1,67 @@
 {
-  "name": "chartjs-plugin-datasource-prometheus",
-  "description": "Chart.js plugin for Prometheus datasource. Like Grafana, but standalone.",
-  "contributors": [
-    "Samuel Berthe",
-    "Frantisek Svoboda"
-  ],
-  "version": "2.3.1",
-  "license": "MIT",
-  "main": "dist/chartjs-plugin-datasource-prometheus.cjs.js",
-  "module": "dist/chartjs-plugin-datasource-prometheus.esm.js",
-  "browser": "dist/chartjs-plugin-datasource-prometheus.umd.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "test": "node test/test.js",
-    "pretest": "npm run build",
-    "upgrade": "npx npm-check-updates"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/samber/chartjs-plugin-datasource-prometheus.git"
-  },
-  "bugs": {
-    "url": "https://github.com/samber/chartjs-plugin-datasource-prometheus/issues"
-  },
-  "files": [
-    "dist/"
-  ],
-  "dependencies": {
-    "chartjs-adapter-date-fns": "^3.0.0",
-    "prometheus-query": "^3.4.1"
-  },
-  "peerDependencies": {
-    "chart.js": ">= 4 < 5"
-  },
-  "devDependencies": {
-    "@rollup/plugin-commonjs": "^28.0.1",
-    "@rollup/plugin-json": "^6.1.0",
-    "@rollup/plugin-node-resolve": "^15.3.0",
-    "@rollup/plugin-replace": "^6.0.1",
-    "chart.js": "~4.2.1",
-    "npm-check-updates": "^16.3.7",
-    "rollup": "^3.29.5",
-    "@rollup/plugin-terser": "^0.4.4",
-    "rollup-plugin-typescript2": "^0.36.0"
-  },
-  "keywords": [
-    "chartjs",
-    "chart.js",
-    "graph",
-    "grafana",
-    "datasource",
-    "plugin",
-    "prometheus",
-    "client",
-    "query",
-    "api",
-    "javascript",
-    "admin",
-    "series",
-    "range",
-    "label",
-    "timeseries",
-    "tsdb"
-  ]
+    "name": "chartjs-plugin-datasource-prometheus",
+    "description": "Chart.js plugin for Prometheus datasource. Like Grafana, but standalone.",
+    "contributors": [
+        "Samuel Berthe"
+    ],
+    "version": "2.3.2",
+    "license": "MIT",
+    "main": "dist/chartjs-plugin-datasource-prometheus.cjs.js",
+    "module": "dist/chartjs-plugin-datasource-prometheus.esm.js",
+    "browser": "dist/chartjs-plugin-datasource-prometheus.umd.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "rollup -c",
+        "dev": "rollup -c -w",
+        "test": "node test/test.js",
+        "pretest": "npm run build",
+        "upgrade": "npx npm-check-updates"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/samber/chartjs-plugin-datasource-prometheus.git"
+    },
+    "bugs": {
+        "url": "https://github.com/samber/chartjs-plugin-datasource-prometheus/issues"
+    },
+    "files": [
+        "dist/"
+    ],
+    "dependencies": {
+        "chartjs-adapter-date-fns": "^3.0.0",
+        "prometheus-query": "^3.5.0"
+    },
+    "peerDependencies": {
+        "chart.js": ">= 4 < 5"
+    },
+    "devDependencies": {
+        "@rollup/plugin-commonjs": "^28.0.1",
+        "@rollup/plugin-json": "^6.1.0",
+        "@rollup/plugin-node-resolve": "^15.3.0",
+        "@rollup/plugin-replace": "^6.0.1",
+        "@rollup/plugin-terser": "^0.4.4",
+        "chart.js": "~4.2.1",
+        "npm-check-updates": "^16.3.7",
+        "rollup": "^3.29.5",
+        "rollup-plugin-typescript2": "^0.36.0"
+    },
+    "keywords": [
+        "chartjs",
+        "chart.js",
+        "graph",
+        "grafana",
+        "datasource",
+        "plugin",
+        "prometheus",
+        "client",
+        "query",
+        "api",
+        "javascript",
+        "admin",
+        "series",
+        "range",
+        "label",
+        "timeseries",
+        "tsdb"
+    ]
 }
