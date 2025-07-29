@@ -17,7 +17,7 @@
       <img src="https://github.com/user-attachments/assets/b1f2e876-0954-4dc3-824d-935d29ba8f3f" width="200" alt="Dash0">
     </div>
     <div>
-      100% OpenTelemetry-native observability platform—simple to use, built on open standards, and designed for full cost control.
+      100% OpenTelemetry-native observability platform<br>Simple to use, built on open standards, and designed for full cost control
     </div>
   </a>
   <hr>
@@ -56,7 +56,7 @@ I would be happy to add links to charts using this library. Feel free to reach m
 - Line styling
 - Send queries with your own Prometheus driver
 
-⚠️ This project is not intented to replace [Grafana](https://grafana.com/). For monitoring purpose or internal company graph showing, Grafana will definitely be better and more secure.
+⚠️ This project is not intended to replace [Grafana](https://grafana.com/). For monitoring purposes or an internal company graph, Grafana will definitely be better and more secure.
 
 ## 🚀 Installation
 
