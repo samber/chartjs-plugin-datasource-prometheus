@@ -201,7 +201,7 @@ export class ChartDatasourcePrometheusPlugin {
                     ctx.font = options.loadingMsg.font;
                 });
             }
-        } else if (chart.data.datasets.length == 0) {
+        } else if (chart.data.datasets.length == 0 && (!options.chartType || options.chartType !== 'stat' || !chart['datasource-prometheus'].statData || chart['datasource-prometheus'].statData.length === 0)) {
             this.writeText(chart, options.noDataMsg.message, (ctx) => {
                 ctx.direction = options.noDataMsg.direction;
                 ctx.textAlign = options.noDataMsg.textAlign;

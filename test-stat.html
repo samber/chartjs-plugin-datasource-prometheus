@@ -30,7 +30,7 @@
   <script>
     // Mock Prometheus data for testing
     function mockPrometheusQuery(start, end, step) {
-      const now = new Date();
+      console.log('Mock function called with:', { start, end, step });
       const data = [];
       
       // Generate 20 data points over the time range
@@ -38,18 +38,25 @@
         const time = new Date(start.getTime() + (i / 19) * (end.getTime() - start.getTime()));
         const baseValue = 59;
         const variation = Math.sin(i * 0.5) * 10 + Math.random() * 5;
-        data.push({
-          time: time,
-          value: baseValue + variation
-        });
+        data.push([
+          time.getTime() / 1000, // Unix timestamp in seconds
+          (baseValue + variation).toString()
+        ]);
       }
       
-      return Promise.resolve({
+      const result = {
+        resultType: "matrix",
         result: [{
-          metric: { job: "web-consumer-bugs" },
+          metric: { 
+            __name__: "web_consumer_bugs",
+            job: "web-consumer-bugs" 
+          },
           values: data
         }]
-      });
+      };
+      
+      console.log('Mock function returning:', result);
+      return Promise.resolve(result);
     }
 
     // Stat Chart
