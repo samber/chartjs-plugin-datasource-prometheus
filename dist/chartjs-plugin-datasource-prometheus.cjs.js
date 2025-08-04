@@ -94,6 +94,10 @@ const colorList = [
 class ChartDatasourcePrometheusPluginOptions {
     constructor() {
         /**
+         * Chart visualization type
+         */
+        this.chartType = 'timeseries';
+        /**
          * Options for Prometheus requests
          */
         this.prometheus = null; // can be null when the provided query is just an async function
@@ -155,6 +159,10 @@ class ChartDatasourcePrometheusPluginOptions {
 
 // enforce xAxes data type to 'time'
 function setTimeAxesOptions(chart) {
+    const options = chart.config.options.plugins["datasource-prometheus"];
+    if (options && options.chartType === 'stat') {
+        return;
+    }
     chart.config.options.scales = !!chart.config.options.scales
         ? chart.config.options.scales
         : {};
@@ -164,7 +172,6 @@ function setTimeAxesOptions(chart) {
     chart.config.options.scales.y = !!chart.config.options.scales.y
         ? chart.config.options.scales.y
         : {};
-    const options = chart.config.options.plugins["datasource-prometheus"];
     const { ticks, time } = JSON.parse(JSON.stringify(chart.config.options.scales.x));
     Object.assign(chart.config.options.scales.x, {
         type: "timeseries",
@@ -259,11 +266,13 @@ class ChartDatasourcePrometheusPlugin {
         chart['datasource-prometheus'] = new ChartDatasourcePrometheusPluginInternals();
     }
     afterInit(chart, args, _options) {
-        if (chart.config['type'] !== "line" && chart.config['type'] !== "bar")
-            throw 'ChartDatasourcePrometheusPlugin is only compatible with Line chart\nFeel free to contribute for more!';
         if (!_options)
             throw 'ChartDatasourcePrometheusPlugin.options is undefined';
         const options = Object.assign(new ChartDatasourcePrometheusPluginOptions(), _options);
+        if (options.chartType === 'stat') ;
+        else if (chart.config['type'] !== "line" && chart.config['type'] !== "bar") {
+            throw 'ChartDatasourcePrometheusPlugin is only compatible with Line chart\nFeel free to contribute for more!';
+        }
         options.assertPluginOptions(); // triggers exceptions
         // auto update
         if (!!options && !!options.timeRange) {
@@ -309,40 +318,65 @@ class ChartDatasourcePrometheusPlugin {
         this.updateMessage(chart, _options);
         Promise.all(reqs)
             .then((results) => {
-            // extract data from responses and prepare series for Chart.js
-            const datasets = results.reduce((datasets, result, queryIndex) => {
-                const seriesCount = datasets.length;
-                const data = result.result.map((serie, i) => {
-                    return {
-                        tension: options.tension,
-                        cubicInterpolationMode: options.cubicInterpolationMode || 'default',
-                        stepped: options.stepped,
-                        fill: options.fill || false,
-                        label: selectLabel(options, serie),
-                        data: serie.values.map((v, j) => {
-                            return {
-                                x: v.time,
-                                y: v.value,
-                            };
-                        }),
-                        backgroundColor: selectBackGroundColor(options, serie, seriesCount + i),
-                        borderColor: selectBorderColor(options, serie, seriesCount + i),
-                        borderWidth: options.borderWidth,
-                        hidden: isHiddenMap[selectLabel(options, serie)] || false,
-                    };
-                });
-                return datasets.concat(...data);
-            }, []);
-            chart.data.datasets = datasets;
-            // in case there is some data, we make things beautiful
-            if (chart.data.datasets.length > 0) {
-                if (options.fillGaps) {
-                    fillGaps(chart, start, end, step, options);
+            if (options.chartType === 'stat') {
+                const statData = results.reduce((stats, result, queryIndex) => {
+                    return stats.concat(result.result.map((serie, i) => {
+                        const values = serie.values;
+                        if (values.length === 0)
+                            return null;
+                        const latestValue = values[values.length - 1];
+                        const previousValue = values.length > 1 ? values[values.length - 2] : null;
+                        const percentChange = previousValue ?
+                            ((latestValue.value - previousValue.value) / previousValue.value) * 100 : null;
+                        return {
+                            label: selectLabel(options, serie),
+                            value: latestValue.value,
+                            percentChange: percentChange,
+                            sparklineData: values.slice(-20),
+                            backgroundColor: selectBackGroundColor(options, serie, i),
+                            borderColor: selectBorderColor(options, serie, i),
+                        };
+                    }).filter(Boolean));
+                }, []);
+                chart['datasource-prometheus'].statData = statData;
+                chart.data.datasets = [];
+            }
+            else {
+                // extract data from responses and prepare series for Chart.js
+                const datasets = results.reduce((datasets, result, queryIndex) => {
+                    const seriesCount = datasets.length;
+                    const data = result.result.map((serie, i) => {
+                        return {
+                            tension: options.tension,
+                            cubicInterpolationMode: options.cubicInterpolationMode || 'default',
+                            stepped: options.stepped,
+                            fill: options.fill || false,
+                            label: selectLabel(options, serie),
+                            data: serie.values.map((v, j) => {
+                                return {
+                                    x: v.time,
+                                    y: v.value,
+                                };
+                            }),
+                            backgroundColor: selectBackGroundColor(options, serie, seriesCount + i),
+                            borderColor: selectBorderColor(options, serie, seriesCount + i),
+                            borderWidth: options.borderWidth,
+                            hidden: isHiddenMap[selectLabel(options, serie)] || false,
+                        };
+                    });
+                    return datasets.concat(...data);
+                }, []);
+                chart.data.datasets = datasets;
+                // in case there is some data, we make things beautiful
+                if (chart.data.datasets.length > 0) {
+                    if (options.fillGaps) {
+                        fillGaps(chart, start, end, step, options);
+                    }
+                    if (options.dataSetHook) {
+                        chart.data.datasets = options.dataSetHook(chart.data.datasets);
+                    }
+                    setTimeAxesOptions(chart);
                 }
-                if (options.dataSetHook) {
-                    chart.data.datasets = options.dataSetHook(chart.data.datasets);
-                }
-                setTimeAxesOptions(chart);
             }
             this.resumeRendering(chart);
         })
@@ -357,6 +391,10 @@ class ChartDatasourcePrometheusPlugin {
         return false;
     }
     afterDraw(chart, args, _options) {
+        const options = Object.assign(new ChartDatasourcePrometheusPluginOptions(), _options);
+        if (options.chartType === 'stat' && chart['datasource-prometheus'].statData) {
+            this.renderStatVisualization(chart, chart['datasource-prometheus'].statData, options);
+        }
         this.updateMessage(chart, _options);
     }
     updateMessage(chart, _options) {
@@ -411,6 +449,77 @@ class ChartDatasourcePrometheusPlugin {
         chart['datasource-prometheus'].rendering = true;
         chart.update();
         chart['datasource-prometheus'].rendering = false;
+    }
+    renderStatVisualization(chart, statData, options) {
+        const ctx = chart.ctx;
+        const width = chart.width;
+        const height = chart.height;
+        chart.clear();
+        const statsPerRow = Math.ceil(Math.sqrt(statData.length));
+        const statWidth = width / statsPerRow;
+        const statHeight = height / Math.ceil(statData.length / statsPerRow);
+        statData.forEach((stat, index) => {
+            const row = Math.floor(index / statsPerRow);
+            const col = index % statsPerRow;
+            const x = col * statWidth;
+            const y = row * statHeight;
+            ctx.save();
+            if (stat.sparklineData && stat.sparklineData.length > 1) {
+                this.drawSparkline(ctx, stat.sparklineData, x, y, statWidth, statHeight, stat.borderColor);
+            }
+            ctx.fillStyle = stat.borderColor || '#333';
+            ctx.font = 'bold 48px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const valueText = this.formatStatValue(stat.value);
+            ctx.fillText(valueText, x + statWidth / 2, y + statHeight / 2 - 20);
+            if (stat.percentChange !== null) {
+                ctx.font = '24px Arial';
+                ctx.fillStyle = stat.percentChange >= 0 ? '#28a745' : '#dc3545';
+                const changeText = `${stat.percentChange >= 0 ? '+' : ''}${stat.percentChange.toFixed(1)}%`;
+                ctx.fillText(changeText, x + statWidth / 2, y + statHeight / 2 + 30);
+            }
+            ctx.font = '16px Arial';
+            ctx.fillStyle = '#666';
+            ctx.fillText(stat.label, x + statWidth / 2, y + statHeight - 20);
+            ctx.restore();
+        });
+    }
+    drawSparkline(ctx, data, x, y, width, height, color) {
+        if (data.length < 2)
+            return;
+        const values = data.map(d => d.value);
+        const minValue = Math.min(...values);
+        const maxValue = Math.max(...values);
+        const valueRange = maxValue - minValue || 1;
+        ctx.save();
+        ctx.globalAlpha = 0.3;
+        ctx.strokeStyle = color || '#007bff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        data.forEach((point, index) => {
+            const px = x + (index / (data.length - 1)) * width;
+            const py = y + height - ((point.value - minValue) / valueRange) * (height * 0.6);
+            if (index === 0) {
+                ctx.moveTo(px, py);
+            }
+            else {
+                ctx.lineTo(px, py);
+            }
+        });
+        ctx.stroke();
+        ctx.restore();
+    }
+    formatStatValue(value) {
+        if (value >= 1000000) {
+            return (value / 1000000).toFixed(1) + 'M';
+        }
+        else if (value >= 1000) {
+            return (value / 1000).toFixed(1) + 'K';
+        }
+        else {
+            return value.toFixed(1);
+        }
     }
 }
 

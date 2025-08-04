@@ -3,6 +3,12 @@ import { ChartDatasourcePrometheusPluginOptions } from "./options";
 
 // enforce xAxes data type to 'time'
 export function setTimeAxesOptions(chart: Chart) {
+  const options = chart.config.options.plugins["datasource-prometheus"];
+  
+  if (options && options.chartType === 'stat') {
+    return;
+  }
+  
   chart.config.options.scales = !!chart.config.options.scales
     ? chart.config.options.scales
     : {};
@@ -12,8 +18,6 @@ export function setTimeAxesOptions(chart: Chart) {
   chart.config.options.scales.y = !!chart.config.options.scales.y
     ? chart.config.options.scales.y
     : {};
-
-  const options = chart.config.options.plugins["datasource-prometheus"];
 
   const { ticks, time } = JSON.parse(
     JSON.stringify(chart.config.options.scales.x),
