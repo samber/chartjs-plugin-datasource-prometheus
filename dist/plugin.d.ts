@@ -9,4 +9,7 @@ export declare class ChartDatasourcePrometheusPlugin {
     writeText(chart: Chart, message: string, fn?: (ctx: CanvasRenderingContext2D) => void): void;
     afterDestroy(chart: Chart, args: any, _options: any): void;
     private resumeRendering;
+    private renderStatVisualization;
+    private drawSparkline;
+    private formatStatValue;
 }

@@ -63,6 +63,11 @@ const colorList = [
 export class ChartDatasourcePrometheusPluginOptions {
 
     /**
+     * Chart visualization type
+     */
+    chartType?: 'timeseries' | 'stat' = 'timeseries';
+
+    /**
      * Options for Prometheus requests
      */
     prometheus: PrometheusConnectionOptions | null = null; // can be null when the provided query is just an async function

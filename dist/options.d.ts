@@ -43,6 +43,10 @@ export declare class ChartDatasourcePrometheusPluginLoadingMsg {
 }
 export declare class ChartDatasourcePrometheusPluginOptions {
     /**
+     * Chart visualization type
+     */
+    chartType?: 'timeseries' | 'stat';
+    /**
      * Options for Prometheus requests
      */
     prometheus: PrometheusConnectionOptions | null;
