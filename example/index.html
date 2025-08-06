@@ -13,13 +13,22 @@
     <form id="refresh-form">
       <input type="text" id="endpoint" placeholder="Prometheus endpoint">
       <input type="text" id="query" placeholder="Prometheus query">
+      <select id="chartType">
+        <option value="timeseries">Timeseries</option>
+        <option value="stat">Stat</option>
+      </select>
       <button>Refresh</button>
     </form>
 
     <section id="doc"><a href="https://github.com/samber/chartjs-plugin-datasource-prometheus">Documentation</a></section>
 
+    <div class="chart-row">
     <div id="myChart">
       <canvas></canvas>
+    </div>
+      <div id="myStatChart">
+        <canvas></canvas>
+      </div>
     </div>
   </div>
 

@@ -25,6 +25,19 @@
     margin-bottom: 10px;
 }
 
+#refresh-form select {
+    padding: 11px;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
 #refresh-form button {
     padding: 15px 32px;
     background-color: #7312ce;
@@ -48,8 +61,16 @@
     text-decoration: none;
 }
 
-#myChart {
-    width: 1000px;
+.chart-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+#myChart, #myStatChart {
+    flex: 1;
+    min-width: 0;
     height: 400px;
-    margin: auto;
 }
