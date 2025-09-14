@@ -4,7 +4,7 @@
     "contributors": [
         "Samuel Berthe"
     ],
-    "version": "2.4.0",
+    "version": "2.4.2",
     "license": "MIT",
     "main": "dist/chartjs-plugin-datasource-prometheus.cjs.js",
     "module": "dist/chartjs-plugin-datasource-prometheus.esm.js",
