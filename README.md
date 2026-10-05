@@ -150,6 +150,7 @@ var myChart = new Chart(ctx, {
 | **prometheus.proxy.port** | no | Proxy port | |
 | **prometheus.withCredentials** | no | Send cookies in cross-site requests | `false` |
 | **prometheus.timeout** | no | Prometheus request timeout in milliseconds | `10000` |
+| **prometheus.insecureSkipTLSVerify** | no | Skip TLS certificate verification, e.g. for self-signed certificates. Node.js only (>= 20.16): throws in browsers. ⚠️ Allows man-in-the-middle attacks, use on internal or dev servers only. Requires `prometheus-query` >= 3.6.0 | `false` |
 | **query** | yes | Prometheus query: string or function (see below). Supports multiple queries, using an array. |  |
 | **timeRange.type** | no | Time range type: absolute or relative | `"absolute"` |
 | **timeRange.start** | yes | Time range start: Date object (absolute) or integer (relative) |  |
@@ -163,9 +164,9 @@ var myChart = new Chart(ctx, {
 | **stepped** | no | false, true, "before", "middle" or "after" | `false` |
 | **stacked** | no | Whether values are stacked or not | false |
 | **fill** | no | Fills the area under the line | `false` |
-| **borderWidth** | no | Should I explain this field? | `3` |
-| **backgroundColor** | no | Should I explain this field? | See library source code |
-| **borderColor** | no | Should I explain this field? | See library source code |
+| **borderWidth** | no | Line width in pixels | `3` |
+| **backgroundColor** | no | Fill color under the line (see `fill`) | See library source code |
+| **borderColor** | no | Line color | See library source code |
 | **errorMsg.message** | no | Overrides error messages | `null` |
 | **errorMsg.font** | no | Font of error messages | `"16px normal 'Helvetica Nueue'"` |
 | **noDataMsg.message** | no | Empty chart message | `"No data to display"` |
