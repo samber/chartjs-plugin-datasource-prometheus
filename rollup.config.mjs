@@ -7,6 +7,10 @@ import pkg from "./package.json" with { type: "json" };
 
 const external = ["assert"];
 
+// rpt2's default include glob (`**/*.ts+(|x)`) matches nothing with picomatch >= 4.0.4, so no
+// TypeScript file gets transpiled. This repo has no .tsx files: a plain glob is enough.
+const tsInclude = ["**/*.ts"];
+
 const banner = `/*!
  * ${pkg.name} v${pkg.version}
  * github.com/samber/chartjs-plugin-datasource-prometheus
@@ -38,6 +42,7 @@ export default [
         browser: true,
       }),
       typescript({
+        include: tsInclude,
         useTsconfigDeclarationDir: true,
         tsconfigOverride: { compilerOptions: { module: "es2015" } },
       }),
@@ -83,6 +88,7 @@ export default [
     external: ["chart.js"],
     plugins: [
       typescript({
+        include: tsInclude,
         tsconfigOverride: { compilerOptions: { module: "es2015" } },
       }),
     ],

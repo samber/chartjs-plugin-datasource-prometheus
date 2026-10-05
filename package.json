@@ -4,7 +4,7 @@
     "contributors": [
         "Samuel Berthe"
     ],
-    "version": "2.4.2",
+    "version": "2.4.3",
     "license": "MIT",
     "main": "dist/chartjs-plugin-datasource-prometheus.cjs.js",
     "module": "dist/chartjs-plugin-datasource-prometheus.esm.js",
@@ -29,7 +29,7 @@
     ],
     "dependencies": {
         "chartjs-adapter-date-fns": "^3.0.0",
-        "prometheus-query": "^3.5.0"
+        "prometheus-query": "^3.6.0"
     },
     "peerDependencies": {
         "chart.js": ">= 4 < 5"
